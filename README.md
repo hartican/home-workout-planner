@@ -1,10 +1,25 @@
-# Home Workout Planner
+# Home Workout Coach
 
-Lightweight single-file planner for short home sessions. Improved mobile UX, added a simple app icon and web manifest so this can be added to home screens.
+Mobile-first workout coach app built from `home-workout-planner-app-spec.md`. Single-file SPA, no build step, localStorage persistence.
 
 Files:
-- home-workout-planner.html — main HTML file
-- assets/icon.svg — app icon (SVG)
-- manifest.json — PWA manifest
+- app.html — the coach app (Today / Plan / Streak), served at the site root
+- home-workout-planner-app-spec.md — product spec the app implements
+- home-workout-planner.html — the original static planner, still available at its own URL
+- assets/icon.svg — app icon
+- manifest.json — PWA manifest (add to home screen)
+- sw.js / version.json — service worker cache + deploy versioning
 
-Usage: open home-workout-planner.html in a browser. To add to home screen on mobile, open the page and use "Add to home screen" (browser-dependent).
+App features:
+- Session generator: standard / momentum-reset / travel / harder-day modes, block-based, with exercise variant rotation and phase-aware targets
+- 8-week progression map with key-lift tracking (push-up, goblet squat, reverse lunge, plank, glute bridge)
+- Streak mechanic — any completed session counts, fallback included
+- Evening "beer check" prompt suggesting an 8-minute reset before alcohol
+- Time-of-day behavior: lighter pre-breakfast sessions, dark theme in the evening
+
+Background signals (optional): the app reads `localStorage["hwc_signals"]`
+(`{"dateISO":"YYYY-MM-DD","steps":1234,"alcoholUnits":0}`) to bias session
+suggestions. Feed it from a phone automation (e.g. an iOS Shortcut); nothing
+is logged manually in the app.
+
+Usage: open `app.html` (or the deployed root URL) on a phone and add to home screen.

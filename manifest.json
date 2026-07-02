@@ -1,7 +1,7 @@
 {
-  "name": "Home Workout Planner",
-  "short_name": "WorkoutPlanner",
-  "start_url": "./home-workout-planner.html",
+  "name": "Home Workout Coach",
+  "short_name": "Coach",
+  "start_url": "./app.html",
   "display": "standalone",
   "background_color": "#f7f6f2",
   "theme_color": "#01696f",

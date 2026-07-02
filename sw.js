@@ -1,7 +1,8 @@
-const CACHE_NAME = 'hwp-cache-20260702T005900Z';
+const CACHE_NAME = 'hwp-cache-20260702T130000Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/app.html',
   '/home-workout-planner.html',
   '/manifest.json',
   '/version.json',
