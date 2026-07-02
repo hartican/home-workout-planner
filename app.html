@@ -827,7 +827,42 @@
     document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
   })();
 
-  if ('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+  /* ---------- updates: check version.json, offer refresh ---------- */
+  async function checkVersion(){
+    try{
+      const resp = await fetch('/version.json', {cache:'no-store'});
+      if (!resp.ok) return;
+      const v = (await resp.json()).version;
+      const stored = localStorage.getItem('hwc_deployed_version');
+      if (!stored){ localStorage.setItem('hwc_deployed_version', v); return; }
+      if (stored !== v && !$('updateBar')){
+        const bar = document.createElement('div');
+        bar.id = 'updateBar';
+        bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.6rem 1rem;padding-top:calc(.6rem + env(safe-area-inset-top));background:var(--color-primary);color:var(--color-text-inverse);font-size:var(--text-sm);font-weight:600';
+        bar.innerHTML = '<span>New version available</span>';
+        const btn = document.createElement('button');
+        btn.textContent = 'Update';
+        btn.style.cssText = 'border:0;border-radius:999px;padding:.5rem .9rem;font-weight:700;background:var(--color-text-inverse);color:var(--color-primary)';
+        btn.addEventListener('click', async () => {
+          try{
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+            localStorage.setItem('hwc_deployed_version', v);
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (reg && reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+          }catch(e){}
+          window.location.reload();
+        });
+        bar.appendChild(btn);
+        document.body.appendChild(bar);
+      }
+    }catch(e){}
+  }
+
+  if ('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').then(reg => { reg.update().catch(()=>{}); }).catch(()=>{});
+  }
+  checkVersion();
 
   renderToday(); renderPlan(); renderLibrary(); renderStreak(); show('today');
   })();

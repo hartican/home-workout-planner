@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hwp-cache-20260702T171500Z';
+const CACHE_NAME = 'hwp-cache-20260702T180000Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -27,17 +27,34 @@ self.addEventListener('activate', event => {
   );
 });
 
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', event => {
-  // network-first for version.json, otherwise cache-first
   const url = new URL(event.request.url);
-  if (url.pathname === '/version.json') {
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+  const isHTML = event.request.mode === 'navigate' ||
+    (event.request.headers.get('accept') || '').includes('text/html') ||
+    url.pathname === '/version.json';
+
+  // network-first for pages and version.json so deploys land immediately;
+  // cache is only the offline fallback
+  if (isHTML) {
+    event.respondWith(
+      fetch(event.request).then(resp => {
+        if (event.request.method === 'GET' && resp && resp.status === 200 && resp.type === 'basic') {
+          const clone = resp.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return resp;
+      }).catch(() => caches.match(event.request))
+    );
     return;
   }
 
+  // cache-first for static assets
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(resp => {
-      // optionally cache new GET requests for same-origin
       if (event.request.method === 'GET' && resp && resp.status === 200 && resp.type === 'basic') {
         const respClone = resp.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, respClone));
