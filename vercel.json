@@ -1,5 +1,7 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/app.html" }
+    { "source": "/", "destination": "/coach.html" },
+    { "source": "/app.html", "destination": "/coach.html" },
+    { "source": "/home-workout-planner.html", "destination": "/coach-classic.html" }
   ]
 }

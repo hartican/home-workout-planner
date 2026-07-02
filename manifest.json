@@ -1,11 +1,11 @@
 {
-  "name": "Home Workout Coach",
+  "name": "Coach",
   "short_name": "Coach",
-  "start_url": "./app.html",
+  "start_url": "./coach.html",
   "display": "standalone",
   "background_color": "#f7f6f2",
   "theme_color": "#01696f",
-  "description": "Simple home workout planner with weekly logging and progressive overload guidance.",
+  "description": "Coach: efficient home strength sessions, streaks, and an 8-week progression.",
   "icons": [
     {
       "src": "./assets/icon-192.png",

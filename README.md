@@ -1,12 +1,12 @@
-# Home Workout Coach
+# Coach
 
-Mobile-first workout coach app built from `home-workout-planner-app-spec.md`. Single-file SPA, no build step, localStorage persistence.
+Mobile-first workout coach app built from `coach-app-spec.md`. Single-file SPA, no build step, localStorage persistence.
 
 Files:
-- app.html — the coach app (Today / Plan / Streak), served at the site root
-- home-workout-planner-app-spec.md — product spec the app implements
-- home-workout-planner.html — the original static planner, still available at its own URL
-- assets/icon.svg — app icon
+- coach.html — the Coach app (Today / Plan / Library / Streak), served at the site root
+- coach-app-spec.md — product spec the app implements
+- coach-classic.html — the original static planner, still available at its own URL
+- assets/ — app icons (💪🏿 PNGs + legacy SVG)
 - manifest.json — PWA manifest (add to home screen)
 - sw.js / version.json — service worker cache + deploy versioning
 
@@ -26,4 +26,7 @@ Background signals (optional): the app reads `localStorage["hwc_signals"]`
 suggestions. Feed it from a phone automation (e.g. an iOS Shortcut); nothing
 is logged manually in the app.
 
-Usage: open `app.html` (or the deployed root URL) on a phone and add to home screen.
+Old URLs (`/app.html`, `/home-workout-planner.html`) are rewritten to the new
+file names, so existing links and installed apps keep working.
+
+Usage: open the deployed root URL on a phone and add to home screen.

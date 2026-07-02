@@ -1,4 +1,4 @@
-# Home Workout Planner App Spec (Jack)
+# Coach App Spec (Jack)
 
 ## 1. Purpose and audience
 
