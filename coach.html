@@ -86,8 +86,14 @@
     .cx .nm{font-weight:600}
     .cx .tg{color:var(--color-text-muted);text-align:right;flex-shrink:0}
     .previewbtns{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem}
+    /* full-width buttons on narrow viewports for easy tapping */
+    .previewbtns > button{width:100%}
     @media (min-width:720px){
-      .previewbtns{flex-direction:row}
+      /* row layout on desktop  keep the primary flexible and secondaries compact */
+      .previewbtns{flex-direction:row;align-items:center}
+      .previewbtns > button{width:auto}
+      .previewbtns .startbig{flex:1;min-height:56px}
+      .previewbtns .startsecondary{min-width:140px}
     }
 
     /* library */
@@ -173,7 +179,8 @@
     .toast.show{opacity:1}
 
     /* small theme toggle */
-    .themebtn{border:0;background:transparent;color:var(--color-text-faint);padding:.35rem .5rem;border-radius:.6rem;font-weight:700;font-size:var(--text-xs)}
+    /* Make the theme toggle easier to see and hit on touch devices */
+    .themebtn{border:0;background:transparent;color:var(--color-text);padding:.35rem .5rem;border-radius:.6rem;font-weight:700;font-size:var(--text-xs);min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
     .themebtn:active{transform:translateY(1px)}
 
     :focus-visible{outline:3px solid var(--color-amber);outline-offset:2px}
@@ -203,7 +210,7 @@
         <button class="modechip" id="goalChip" type="button">Goal: Visible abs</button>
         <h1 class="display" id="coachHeadline">Twenty minutes. Then the evening is yours.</h1>
         <p class="say" id="coachSay">Answer three quick questions, or let the coach roll one for you.</p>
-        <div style="margin-top:.6rem;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:700">Vibe coded by Jack Hartican, 2026(C)</div>
+        <div style="margin-top:.6rem;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:700">Vibe coded by Jack Hartican, 2026©</div>
         <button class="startbig" id="quizBtn" type="button">Check in — 3 questions</button>
         <button class="startsecondary" id="quickStartBtn" type="button">Quick start</button>
         <div class="sessionmeta" id="sessionMeta"></div>
@@ -268,7 +275,7 @@
         <div class="previewbtns">
           <button class="startbig" id="beginBtn" type="button">Begin session</button>
           <button class="startsecondary" id="reshuffleBtn" type="button" hidden>Roll another</button>
-          <button class="startsecondary" id="previewBack" type="button">Back</button>
+          <button class="startsecondary" id="previewBack" type="button" aria-label="Back to today">Back</button>
         </div>
       </div>
     </section>
