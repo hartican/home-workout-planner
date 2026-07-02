@@ -18,6 +18,7 @@
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
       --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
       --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.5rem + 2vw, 3rem);
       --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
       --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca;
       --color-text:#28251d; --color-text-muted:#66645f; --color-text-faint:#8e8b84; --color-text-inverse:#f9f8f4;
@@ -69,13 +70,11 @@
     .actions{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4)}
 
     /* Mobile tweaks */
-    .mobile-cta{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;width:calc(100% - 48px);max-width:520px}
     @media (max-width: 900px){
       .hero,.cards-2,.controls,.stats,.video-grid{grid-template-columns:1fr}
       .meta-grid{grid-template-columns:1fr 1fr}
       .nav{display:none}
       .mobile-toggle{display:inline-flex}
-      .mobile-cta{display:block}
     }
     @media (max-width: 640px){
       .shell,.topbar-inner{padding-left:var(--space-3);padding-right:var(--space-3)}
@@ -177,7 +176,7 @@
             <li>If skipping feels awkward, swap for a fast march or low pogo hops.</li>
           </ul>
           <div class="actions" style="margin-top:1rem">
-            <button class="btn btn-primary" id="warmupNext" type="button">I'm warmed up 14 Start circuit</button>
+            <button class="btn btn-primary" id="warmupNext" type="button">I'm warmed up → Start circuit</button>
           </div>
         </article>
       </div>
@@ -304,11 +303,6 @@
 
   </main>
 
-  <!-- Mobile sticky CTA for quick session start -->
-  <div class="mobile-cta">
-    <button class="btn btn-primary" id="mobileStart" type="button" style="width:100%;display:inline-block;text-align:center;">Start session</button>
-  </div>
-
   <script>
     // Simple UI flow + client-side persistence using localStorage
     (function(){
@@ -322,7 +316,6 @@
       };
       const beginBtn = document.getElementById('beginBtn');
       const warmupNext = document.getElementById('warmupNext');
-      const mobileStart = document.getElementById('mobileStart');
       const circuitDone = document.getElementById('circuitDone');
       const circuitBack = document.getElementById('circuitBack');
       const backToCircuit = document.getElementById('backToCircuit');
@@ -440,11 +433,19 @@
       // basic button wiring (use showStep with scroll=true for user-triggered navigation)
       beginBtn && beginBtn.addEventListener('click', ()=> showStep('warmup', true));
       warmupNext && warmupNext.addEventListener('click', ()=> showStep('circuit', true));
-      mobileStart && mobileStart.addEventListener('click', ()=> showStep('warmup', true));
       circuitDone && circuitDone.addEventListener('click', ()=> { showStep('progress', true); const s = readUIState(); for (let i=0;i<7;i++){ if (!s.week[i].done){ s.week[i].done = true; break; } } saveState(s); applyStateToUI(s); refreshProgressUI(s); });
       circuitBack && circuitBack.addEventListener('click', ()=> showStep('warmup', true));
       backToCircuit && backToCircuit.addEventListener('click', ()=> showStep('circuit', true));
       openProgressBtn && openProgressBtn.addEventListener('click', ()=> showStep('progress', true));
+
+      // nav links: pipeline sections are hidden until shown, so reveal the step before jumping
+      document.querySelectorAll('#primaryNav a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          const target = link.getAttribute('href').slice(1);
+          if (sections[target]) { e.preventDefault(); showStep(target, true); }
+          closeMobileNav();
+        });
+      });
 
       saveBtn && saveBtn.addEventListener('click', ()=>{ const s = readUIState(); saveState(s); refreshProgressUI(s); });
       resetBtn && resetBtn.addEventListener('click', ()=>{ if (!confirm('Reset this week? This clears local data.')) return; const s = defaultState(); saveState(s); applyStateToUI(s); refreshProgressUI(s); });
@@ -480,7 +481,7 @@
           li.style.padding='6px 0';
           const when = l.date || (l.timestamp ? l.timestamp.split('T')[0] : 'unknown');
           const summary = l.summary || (l.state ? (`Done:${(l.state.week||[]).filter(d=>d.done).length} DB:${l.state.currentWeight || ''}kg`) : '');
-          li.textContent = `${when} 14 ${summary}`;
+          li.textContent = `${when} — ${summary}`;
           list.appendChild(li);
         });
         container.appendChild(list);
@@ -519,28 +520,31 @@
       // mobile nav behavior
       const mobileToggle = document.getElementById('mobileNavToggle');
       const primaryNav = document.getElementById('primaryNav');
+      function openMobileNav(){
+        primaryNav.style.display = 'flex';
+        primaryNav.style.flexDirection = 'column';
+        primaryNav.style.gap = '12px';
+        primaryNav.style.padding = '12px';
+        primaryNav.style.background = 'var(--color-surface)';
+        primaryNav.style.position = 'absolute';
+        primaryNav.style.top = '64px';
+        primaryNav.style.right = '16px';
+        primaryNav.style.borderRadius = '8px';
+        primaryNav.style.boxShadow = 'var(--shadow-md)';
+      }
+      function closeMobileNav(){
+        mobileToggle && mobileToggle.setAttribute('aria-expanded', 'false');
+        primaryNav.style.display = '';
+        primaryNav.style.position = '';
+        primaryNav.style.top = '';
+        primaryNav.style.right = '';
+        primaryNav.style.background = '';
+        primaryNav.style.padding = '';
+      }
       mobileToggle && mobileToggle.addEventListener('click', () => {
         const expanded = mobileToggle.getAttribute('aria-expanded') === 'true';
         mobileToggle.setAttribute('aria-expanded', String(!expanded));
-        if (!expanded) {
-          primaryNav.style.display = 'flex';
-          primaryNav.style.flexDirection = 'column';
-          primaryNav.style.gap = '12px';
-          primaryNav.style.padding = '12px';
-          primaryNav.style.background = 'var(--color-surface)';
-          primaryNav.style.position = 'absolute';
-          primaryNav.style.top = '64px';
-          primaryNav.style.right = '16px';
-          primaryNav.style.borderRadius = '8px';
-          primaryNav.style.boxShadow = 'var(--shadow-md)';
-        } else {
-          primaryNav.style.display = '';
-          primaryNav.style.position = '';
-          primaryNav.style.top = '';
-          primaryNav.style.right = '';
-          primaryNav.style.background = '';
-          primaryNav.style.padding = '';
-        }
+        if (!expanded) openMobileNav(); else closeMobileNav();
       });
 
       // version check and service worker registration (unchanged)
