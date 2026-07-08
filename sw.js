@@ -1,12 +1,10 @@
-const CACHE_NAME = 'coach-cache-20260702T183000Z';
+const CACHE_NAME = 'coach-cache-20260707T113836Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/coach.html',
-  '/coach-classic.html',
   '/manifest.json',
   '/version.json',
-  '/assets/icon.svg',
   '/assets/icon-180.png',
   '/assets/icon-192.png',
   '/assets/icon-512.png'

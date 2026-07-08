@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#01696f">
   <title>Coach</title>
-  <link rel="icon" href="./assets/icon-192.png" type="image/png">
+  <link rel="icon" href="./assets/icon-180.png" type="image/png">
   <link rel="apple-touch-icon" href="./assets/icon-180.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,6 +79,7 @@
     /* preview */
     .preview h1{font-size:var(--text-xl);margin:.5rem 0 .2rem}
     .preview .say{font-size:var(--text-sm);color:var(--color-text-muted);margin:0 0 .8rem}
+    .preview .reason{font-size:var(--text-sm);color:var(--color-text);background:var(--color-primary-soft);border-radius:.9rem;padding:.75rem .9rem;margin:.8rem 0 1rem}
     .circuit{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1.25rem;padding:.4rem 1.1rem;box-shadow:var(--shadow)}
     .cblock{padding:.7rem 0 .2rem;font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary)}
     .cx{display:flex;justify-content:space-between;gap:.8rem;padding:.55rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
@@ -137,6 +138,7 @@
     /* finish / log */
     .finish h1{font-size:var(--text-2xl);margin:.4rem 0}
     .finish .won{color:var(--color-good);font-weight:700}
+    .finish{padding-bottom:7rem}
     .liftlog{margin-top:1rem;display:grid;gap:.6rem}
     .liftrow{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;padding:.8rem 1rem;display:flex;align-items:center;gap:.6rem}
     .liftrow label{flex:1;font-weight:600;font-size:var(--text-sm)}
@@ -175,7 +177,7 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:var(--color-primary)}
 
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(6rem + env(safe-area-inset-bottom));background:var(--color-text);color:var(--color-bg);padding:.6rem 1rem;border-radius:999px;font-size:var(--text-sm);font-weight:600;z-index:99;opacity:0;transition:opacity .25s}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(6rem + env(safe-area-inset-bottom));background:var(--color-text);color:var(--color-bg);padding:.6rem 1rem;border-radius:999px;font-size:var(--text-sm);font-weight:600;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none}
     .toast.show{opacity:1}
 
     /* small theme toggle */
@@ -184,6 +186,12 @@
     .themebtn:active{transform:translateY(1px)}
     .dayhelp{margin-top:.45rem;display:block;background:var(--color-surface);border:1px solid var(--color-line);padding:.6rem 1rem;border-radius:.9rem;font-size:var(--text-sm);color:var(--color-text-muted);max-width:760px;margin-left:auto;margin-right:auto}
     .daylabel{cursor:pointer}
+    .localdata{margin-top:1rem;padding:1rem;border:1px solid var(--color-line);border-radius:1rem;background:var(--color-surface)}
+    .localdata h3{font-size:var(--text-lg);font-family:var(--font-display);font-weight:400;margin:0 0 .4rem}
+    .localdata p{font-size:var(--text-sm);color:var(--color-text-muted);margin:.2rem 0 .8rem}
+    .databtns{display:grid;gap:.55rem}
+    .databtn{display:block;width:100%;min-height:48px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);font-weight:700;font-size:var(--text-sm);text-align:center;padding:.7rem 1rem}
+    .databtn.danger{border-color:color-mix(in srgb, var(--color-amber) 35%, var(--color-line));color:var(--color-amber)}
 
     :focus-visible{outline:3px solid var(--color-amber);outline-offset:2px}
     @media (prefers-reduced-motion: reduce){ *{transition:none !important;animation:none !important} }
@@ -274,6 +282,7 @@
         <span class="modechip" id="previewChip">Standard · week 1</span>
         <h1 class="display" id="previewTitle">Your circuit tonight</h1>
         <p class="say" id="previewSay">This is everything. Nothing else to think about.</p>
+        <p class="reason" id="previewReason">Built for your time, energy, and goal.</p>
         <div class="circuit" id="circuitList"></div>
         <div class="previewbtns">
           <button class="startbig" id="beginBtn" type="button">Begin session</button>
@@ -372,6 +381,16 @@
         <label>Time zone <input id="profileTZ" type="text" placeholder="e.g. America/Los_Angeles"></label>
         <label>Longitude <input id="profileLong" type="number" step="0.01"></label>
         <div style="display:flex;gap:.6rem;margin-top:.6rem"><button class="startbig" id="saveProfile">Save profile</button><button class="startsecondary" id="cancelProfile">Cancel</button></div>
+        <div class="localdata">
+          <h3>Local data</h3>
+          <p>Coach data lives only in this browser. Export a backup before clearing site data or moving phones.</p>
+          <div class="databtns">
+            <button class="databtn" id="exportData" type="button">Export backup</button>
+            <label class="databtn" for="importData">Import backup</label>
+            <input id="importData" type="file" accept="application/json" hidden>
+            <button class="databtn danger" id="resetData" type="button">Reset Coach data</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -529,6 +548,23 @@
   /* ---------- session generator ---------- */
   function hourNow(){ return new Date().getHours(); }
   function timeOfDay(){ const h = hourNow(); return h < 11 ? 'am' : (h >= 17 ? 'pm' : 'day'); }
+  function focusFrom(emphasis){
+    if (emphasis !== 'goal') return emphasis;
+    return state.goal === 'abs' ? 'core' : state.goal === 'chain' ? 'legs' : 'push';
+  }
+  function focusLabel(emphasis){
+    const labels = {goal: GOALS[state.goal].toLowerCase(), core:'abs/core', legs:'legs and glutes', push:'push and upper body', travel:'no-kit movement'};
+    return labels[emphasis] || labels[focusFrom(emphasis)] || 'the goal';
+  }
+  function modeReason(mode, time, emphasis, source){
+    const parts = [];
+    if (source === 'quick') parts.push('Quick start rolled this inside your limits');
+    else parts.push((time || 20) + ' minutes available');
+    parts.push('focus: ' + focusLabel(emphasis));
+    parts.push(MODE_LABEL[mode].toLowerCase() + ' session');
+    if (signalsBad()) parts.push('today looks like an easier-streak day');
+    return parts.join(' · ') + '.';
+  }
 
   function buildSession(mode, opts){
     opts = opts || {};
@@ -536,6 +572,7 @@
     const n = opts.seed != null ? opts.seed : state.sessions.length;
     let timeBudget = opts.time || null;
     const emphasis = opts.emphasis || 'goal';
+    const focus = focusFrom(emphasis);
     const hard = mode === 'harder';
     let steps = [];
     const add = (ex, target, restSec, block) => steps.push({exId: Object.keys(EX).find(k=>EX[k]===ex) || null, block: block || ex.cat, name:ex.name, target, cue:ex.cue, demo:ex.demo||null, how:ex.how||'', rest:restSec||0});
@@ -575,22 +612,35 @@
       add(EX.lightgoblet, '2 easy minutes — quick win', 0, 'Opener');
 
       const push = pushPool[n % pushPool.length];
-      add(push, `${t.push} reps`, restBase, 'Strength');
       const sq = squatPool[n % squatPool.length];
-      add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
-      add(lungePool[n % lungePool.length], `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+      const lunge = lungePool[n % lungePool.length];
+      if (focus === 'core'){
+        add(EX.plank, `${t.plank} seconds`, restBase, 'Core focus');
+        add(push, `${t.push} reps`, restBase, 'Strength');
+        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
+        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+      } else if (focus === 'legs'){
+        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Leg focus');
+        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Leg focus');
+        add(EX.bandhinge, '12–15 reps', restBase, 'Leg focus');
+        add(push, `${t.push} reps`, restBase, 'Strength');
+      } else if (focus === 'push'){
+        add(push, `${t.push} reps`, restBase, 'Push focus');
+        add(EX.bandrow, '10–12 reps', restBase, 'Push focus');
+        add(pushPool[(n+1) % pushPool.length], `${Math.max(4, t.push - 2)} reps`, restBase, 'Push focus');
+        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
+        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+      } else {
+        add(push, `${t.push} reps`, restBase, 'Strength');
+        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
+        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+      }
       if (!morning) add(hingePool[n % hingePool.length], `${t.bridge} reps`, restBase, 'Strength');
       if (hard) add(EX.carry, '2 × 20 m, heavy-ish — optional', restBase, 'Strength');
 
-      // emphasis / goal shaping
-      if (emphasis === 'legs'){ add(EX.bandhinge, '12–15 reps', restBase, 'Strength'); }
-      if (emphasis === 'push'){ add(pushPool[(n+1) % pushPool.length], `${Math.max(4, t.push - 2)} reps`, restBase, 'Strength'); }
-      if (emphasis === 'goal' && state.goal === 'chain'){ add(EX.bandhinge, '12–15 reps', restBase, 'Strength'); }
-      if (emphasis === 'goal' && state.goal === 'upper'){ add(EX.bandrow, '10–12 reps', restBase, 'Strength'); }
-
-      add(EX.plank, `${t.plank} seconds`, restBase, 'Core');
+      if (focus !== 'core') add(EX.plank, `${t.plank} seconds`, restBase, 'Core');
       add(corePool[n % corePool.length], corePool[n % corePool.length] === EX.taps ? '10–16 per side' : (corePool[n % corePool.length] === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
-      if (emphasis === 'core' || (emphasis === 'goal' && state.goal === 'abs' && !morning)){
+      if (focus === 'core' && !morning){
         const extra = corePool[(n+1) % corePool.length];
         add(extra, extra === EX.taps ? '10–16 per side' : (extra === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
       }
@@ -663,6 +713,7 @@
     const emphasis = (quiz.train === 'travel' || quiz.train === 'goal') ? 'goal' : quiz.train;
     // pass time budget to the session builder so it can tune rests and length
     pending = buildSession(mode, {emphasis, time: Number(quiz.time)});
+    pending.reason = modeReason(mode, Number(quiz.time), emphasis, 'quiz');
     pendingQuick = false;
     renderPreview('Built from your check-in. This is the whole session — nothing else today.');
     show('preview');
@@ -676,6 +727,7 @@
     const emphs = state.goal === 'abs' ? ['goal','goal','core','legs','push'] : state.goal === 'chain' ? ['goal','goal','legs','core','push'] : ['goal','goal','push','core','legs'];
     const emphasis = emphs[Math.floor(Math.random()*emphs.length)];
     pending = buildSession(mode, {emphasis, seed: Math.floor(Math.random()*97)});
+    pending.reason = modeReason(mode, null, emphasis, 'quick');
     pendingQuick = true;
     renderPreview('Rolled inside your limits, pointed at the goal. Don’t overthink it.');
     show('preview');
@@ -687,6 +739,7 @@
     $('previewChip').textContent = MODE_LABEL[pending.mode] + ' · week ' + pending.week + ' · ' + GOALS[state.goal];
     $('previewTitle').textContent = pending.mode === 'fallback' ? 'Your six minutes' : (timeOfDay() === 'am' ? 'Your circuit this morning' : 'Your circuit tonight');
     $('previewSay').textContent = sayText;
+    $('previewReason').textContent = pending.reason || 'Built for your time, energy, and current goal.';
     let html = '', lastBlock = null;
     pending.steps.forEach(s => {
       if (s.block !== lastBlock){ html += `<div class="cblock">${s.block}</div>`; lastBlock = s.block; }
@@ -761,6 +814,58 @@
       p.name = $('profileName').value||''; p.avatar = $('profileAvatar').value||''; p.height = $('profileHeight').value||null; p.age = $('profileAge').value||null; p.sex = $('profileSex').value||''; p.weight = $('profileWeight').value||null; p.fitnessLevel = $('profileLevel').value||''; p.timezone = $('profileTZ').value||''; p.longitude = $('profileLong').value||null; state.profile = p; save(); toast('Profile saved'); show('today');
     }
     if (e.target && e.target.id === 'cancelProfile'){ show('today'); }
+    if (e.target && e.target.id === 'exportData'){ exportCoachData(); }
+    if (e.target && e.target.id === 'resetData'){ resetCoachData(); }
+  });
+
+  function validImportState(value){
+    return value && typeof value === 'object' && Array.isArray(value.sessions) && value.lifts && typeof value.lifts === 'object';
+  }
+  function exportCoachData(){
+    const payload = {app:'Coach', exportedAt:new Date().toISOString(), version:localStorage.getItem('hwc_deployed_version') || null, state};
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'coach-backup-' + todayISO() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast('Backup exported');
+  }
+  function importCoachData(file){
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(String(reader.result || '{}'));
+        const imported = parsed.state || parsed;
+        if (!validImportState(imported)) throw new Error('Invalid Coach backup');
+        state = Object.assign(defaultState(), imported);
+        save();
+        toast('Backup imported');
+        window.setTimeout(() => window.location.reload(), 500);
+      }catch(e){
+        toast('Import failed');
+      }
+    };
+    reader.readAsText(file);
+  }
+  function resetCoachData(){
+    if (!window.confirm('Reset all Coach data in this browser? This clears sessions, lifts, profile, signals, and preferences.')) return;
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(SIGNALS_KEY);
+    localStorage.removeItem('hwc_theme_pref');
+    localStorage.removeItem('hwc_reminder_enabled');
+    localStorage.removeItem('hwc_deployed_version');
+    state = defaultState();
+    save();
+    window.location.reload();
+  }
+  $('importData').addEventListener('change', e => {
+    importCoachData(e.target.files && e.target.files[0]);
+    e.target.value = '';
   });
 
   /* ---------- library ---------- */
