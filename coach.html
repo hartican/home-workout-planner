@@ -172,10 +172,9 @@
     .dotcal .dd{aspect-ratio:1;border-radius:50%;background:var(--color-surface-2);border:1px solid var(--color-line);display:grid;place-items:center;font-size:var(--text-xs);color:var(--color-text-faint)}
     .dotcal .dd.othermonth{opacity:.42}
     .dotcal .dd.future{background:transparent}
-    .dotcal .dd.inwindow{border-color:color-mix(in srgb, var(--color-primary) 45%, var(--color-line))}
     .dotcal .dd.hit{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse);font-weight:700}
+    .dotcal .dd.freeze{background:var(--color-amber-soft);border-color:var(--color-amber);color:var(--color-amber);font-weight:700}
     .dotcal .dd.today{outline:2px solid var(--color-amber);outline-offset:2px}
-    .dotcal .dd.deadline{border:2px dashed var(--color-primary);font-weight:700;color:var(--color-primary)}
     .streakrules{margin-top:1.3rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .streakrules li{margin-bottom:.3rem}
 
@@ -363,16 +362,18 @@
       <div class="streak-head"><h2 class="display">Streak</h2></div>
       <div class="streakhero">
         <span class="n display" id="streakBig">0</span>
-        <span class="cap" id="streakCap">session streak · best 0</span>
+        <span class="cap" id="streakCap">day streak · best 0</span>
       </div>
       <div class="streakdeadline" aria-live="polite">
         <strong id="streakTimeLeft">Complete a session to begin</strong>
-        <span id="streakDue">Your streak runs on a rolling seven-day window.</span>
+        <span id="streakDue">3 cheat days banked · bank full.</span>
       </div>
       <div id="dotCalHeader" style="text-align:center;margin-top:.4rem;font-weight:700;color:var(--color-text-muted)"></div>
       <div class="dotcal" id="dotCal"></div>
       <ul class="streakrules">
-        <li>Complete at least one session every seven days to keep the streak alive.</li>
+        <li>Complete one session every day to keep the streak alive.</li>
+        <li>Three cheat days are banked. One missed day uses one freeze.</li>
+        <li>When the bank is below three, one freeze returns every 30 days.</li>
         <li>Any completed session counts — momentum resets count fully.</li>
         <li>Travel days count fully.</li>
         <li>The streak measures showing up, not intensity.</li>
@@ -445,7 +446,9 @@
   'use strict';
   const KEY = 'hwc_state_v1';
   const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
-  const STREAK_WINDOW_DAYS = 7;
+  const STREAK_FREEZE_MAX = 3;
+  const STREAK_FREEZE_REFILL_DAYS = 30;
+  const STREAK_SYSTEM_VERSION = 3;
   const $ = id => document.getElementById(id);
   const yt = q => 'https://www.youtube.com/results?search_query=' + q;
 
@@ -485,11 +488,31 @@
   /* ---------- state ---------- */
   function todayISO(d){ const x=d||new Date(); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
   function defaultState(){
-    return { startDate: todayISO(), goal:'abs', sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [], streakFreezes: 0, maxStreak: 0, profile: {name:'', avatar:'', height:null, age:null, sex:'', weight:null, fitnessLevel:'', timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', longitude:null} };
+    return { startDate: todayISO(), goal:'abs', sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [], streakFreezes: STREAK_FREEZE_MAX, streakFreezeUses: [], streakFreezeAccrualDate: todayISO(), streakSystemVersion: STREAK_SYSTEM_VERSION, maxStreak: 0, profile: {name:'', avatar:'', height:null, age:null, sex:'', weight:null, fitnessLevel:'', timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', longitude:null} };
   }
   function load(){ try{ const raw=localStorage.getItem(KEY); return raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState(); }catch(e){ return defaultState(); } }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
   let state = load();
+  function ensureStreakSystemState(){
+    if (state.streakSystemVersion !== STREAK_SYSTEM_VERSION){
+      state.streakFreezes = STREAK_FREEZE_MAX;
+      state.streakFreezeUses = [];
+      state.streakFreezeAccrualDate = todayISO();
+      state.streakSystemVersion = STREAK_SYSTEM_VERSION;
+      state.maxStreak = 0;
+      save();
+      return;
+    }
+    const safeFreezes = Math.max(0, Math.min(STREAK_FREEZE_MAX, Number(state.streakFreezes) || 0));
+    const safeUses = Array.isArray(state.streakFreezeUses) ? state.streakFreezeUses.filter(iso => typeof iso === 'string') : [];
+    if (safeFreezes !== state.streakFreezes || safeUses.length !== (state.streakFreezeUses || []).length || !state.streakFreezeAccrualDate){
+      state.streakFreezes = safeFreezes;
+      state.streakFreezeUses = safeUses;
+      state.streakFreezeAccrualDate = state.streakFreezeAccrualDate || todayISO();
+      save();
+    }
+  }
+  ensureStreakSystemState();
 
   const GOALS = {abs:'Visible abs', chain:'Anterior & posterior chain', upper:'Upper body'};
 
@@ -532,10 +555,69 @@
       .filter(d => d && calendarDayNumber(d) <= refDay)
       .sort((a, b) => calendarDayNumber(a) - calendarDayNumber(b));
   }
-  function rollingBestStreak(dates){
+  function sessionDaySet(referenceDate){ return new Set(sessionDates(referenceDate).map(todayISO)); }
+  function freezeUseSet(referenceDate){
+    const refDay = calendarDayNumber(referenceDate || new Date());
+    return new Set((state.streakFreezeUses || []).filter(iso => {
+      const d = parseISODate(iso);
+      return d && calendarDayNumber(d) <= refDay;
+    }));
+  }
+  function replenishFreezeBank(referenceDate){
+    const today = referenceDate || new Date();
+    if (state.streakFreezes >= STREAK_FREEZE_MAX) return false;
+    const accrualDate = parseISODate(state.streakFreezeAccrualDate) || today;
+    const credits = Math.min(STREAK_FREEZE_MAX - state.streakFreezes, Math.floor(daysBetween(accrualDate, today) / STREAK_FREEZE_REFILL_DAYS));
+    if (credits <= 0) return false;
+    state.streakFreezes += credits;
+    state.streakFreezeAccrualDate = todayISO(state.streakFreezes === STREAK_FREEZE_MAX ? today : addDays(accrualDate, credits * STREAK_FREEZE_REFILL_DAYS));
+    return true;
+  }
+  function reconcileDailyStreak(referenceDate){
+    const today = referenceDate || new Date();
+    const sessions = sessionDaySet(today);
+    const freezes = freezeUseSet(today);
+    let changed = replenishFreezeBank(today);
+    if (!sessions.size){
+      if (changed) save();
+      return {sessions, freezes, protectedDays:new Set(), changed};
+    }
+
+    const startDate = parseISODate(state.startDate) || today;
+    const anchor = sessions.has(todayISO(today)) ? new Date(today) : addDays(today, -1);
+    const protectedDays = new Set();
+    const bankWasFull = state.streakFreezes === STREAK_FREEZE_MAX;
+    let earliestNewFreeze = null;
+    for (let d = anchor; calendarDayNumber(d) >= calendarDayNumber(startDate); d = addDays(d, -1)){
+      const iso = todayISO(d);
+      if (sessions.has(iso) || freezes.has(iso)){
+        protectedDays.add(iso);
+        continue;
+      }
+      if (state.streakFreezes <= 0) break;
+      state.streakFreezes--;
+      freezes.add(iso);
+      state.streakFreezeUses = [...freezes].sort();
+      earliestNewFreeze = iso;
+      protectedDays.add(iso);
+      changed = true;
+    }
+    if (earliestNewFreeze && (bankWasFull || !parseISODate(state.streakFreezeAccrualDate))) state.streakFreezeAccrualDate = earliestNewFreeze;
+    if (changed) save();
+    return {sessions, freezes, protectedDays, changed};
+  }
+  function countTrailingDays(protectedDays, referenceDate){
+    const today = referenceDate || new Date();
+    let d = protectedDays.has(todayISO(today)) ? new Date(today) : addDays(today, -1);
+    let count = 0;
+    while (protectedDays.has(todayISO(d))){ count++; d = addDays(d, -1); }
+    return count;
+  }
+  function bestDailyStreak(protectedDays){
+    const dates = [...protectedDays].map(parseISODate).filter(Boolean).sort((a, b) => calendarDayNumber(a) - calendarDayNumber(b));
     let best = 0, run = 0, previous = null;
     dates.forEach(d => {
-      run = previous && daysBetween(previous, d) <= STREAK_WINDOW_DAYS ? run + 1 : 1;
+      run = previous && daysBetween(previous, d) === 1 ? run + 1 : 1;
       best = Math.max(best, run);
       previous = d;
     });
@@ -543,20 +625,13 @@
   }
   function streakSnapshot(referenceDate){
     const today = referenceDate || new Date();
-    const dates = sessionDates(today);
-    if (!dates.length) return {count:0, best:0, active:false, daysLeft:null, last:null, due:null};
-
-    const last = dates[dates.length - 1];
-    const due = addDays(last, STREAK_WINDOW_DAYS);
-    const daysLeft = STREAK_WINDOW_DAYS - daysBetween(last, today);
-    let count = 1;
-    for (let i = dates.length - 1; i > 0; i--){
-      if (daysBetween(dates[i - 1], dates[i]) > STREAK_WINDOW_DAYS) break;
-      count++;
-    }
-    const active = daysLeft >= 0;
-    const best = rollingBestStreak(dates);
-    return {count:active ? count : 0, best, active, daysLeft:Math.max(0, daysLeft), last, due};
+    const reconciled = reconcileDailyStreak(today);
+    const protectedDays = new Set([...reconciled.sessions, ...reconciled.freezes]);
+    const count = countTrailingDays(protectedDays, today);
+    const best = bestDailyStreak(protectedDays);
+    const hasSessionToday = reconciled.sessions.has(todayISO(today));
+    const nextFreeze = state.streakFreezes < STREAK_FREEZE_MAX ? addDays(parseISODate(state.streakFreezeAccrualDate) || today, STREAK_FREEZE_REFILL_DAYS) : null;
+    return {count, best, active:count > 0, hasSessionToday, freezes:state.streakFreezes, sessions:reconciled.sessions, freezeUses:reconciled.freezes, nextFreeze};
   }
   function streakCount(){
     const snapshot = streakSnapshot();
@@ -925,18 +1000,20 @@
       save();
     }
     $('streakBig').textContent = snapshot.count;
-    $('streakCap').textContent = 'session streak · best ' + snapshot.best;
-    if (!snapshot.last){
+    $('streakCap').textContent = 'day streak · best ' + snapshot.best;
+    const freezeLabel = snapshot.freezes + (snapshot.freezes === 1 ? ' cheat day banked' : ' cheat days banked');
+    const freezeDetail = snapshot.nextFreeze ? ' · next freeze ' + snapshot.nextFreeze.toLocaleDateString(undefined, {day:'numeric', month:'short'}) : ' · bank full';
+    if (!snapshot.active){
       $('streakTimeLeft').textContent = 'Complete a session to begin';
-      $('streakDue').textContent = 'Your streak runs on a rolling seven-day window.';
-    } else if (!snapshot.active){
-      $('streakTimeLeft').textContent = 'Streak window ended';
-      $('streakDue').textContent = 'Complete a session today to start a new streak.';
+      $('streakDue').textContent = freezeLabel + freezeDetail + '.';
+    } else if (snapshot.hasSessionToday){
+      $('streakTimeLeft').textContent = 'Streak secured today';
+      $('streakDue').textContent = freezeLabel + freezeDetail + '.';
     } else {
-      $('streakTimeLeft').textContent = snapshot.daysLeft === 0 ? 'Last day to keep it' : snapshot.daysLeft + (snapshot.daysLeft === 1 ? ' day left' : ' days left');
-      $('streakDue').textContent = 'Complete your next session by ' + snapshot.due.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'}) + '.';
+      $('streakTimeLeft').textContent = 'Complete today to keep it';
+      $('streakDue').textContent = freezeLabel + freezeDetail + '.';
     }
-    const days = new Set(state.sessions.map(s=>s.date));
+    const days = snapshot.sessions || new Set(state.sessions.map(s=>s.date));
     const cells = ['M','T','W','T','F','S','S'].map(d=>`<span class="dh">${d}</span>`);
     const today = new Date();
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1, 12);
@@ -944,18 +1021,17 @@
     const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 12);
     const end = addDays(monthEnd, 6 - ((monthEnd.getDay() + 6) % 7));
     $('dotCalHeader').textContent = today.toLocaleDateString(undefined, {month:'long', year:'numeric'});
-    const deadlineISO = snapshot.active && snapshot.due ? todayISO(snapshot.due) : '';
     for (let i=0;i<=daysBetween(start, end);i++){
       const d = new Date(start); d.setDate(start.getDate()+i);
       const iso = todayISO(d);
       const classes = ['dd'];
       if (d.getMonth() !== today.getMonth()) classes.push('othermonth');
       if (calendarDayNumber(d) > calendarDayNumber(today)) classes.push('future');
-      if (snapshot.active && calendarDayNumber(d) >= calendarDayNumber(today) && calendarDayNumber(d) <= calendarDayNumber(snapshot.due)) classes.push('inwindow');
       if (days.has(iso)) classes.push('hit');
+      if (snapshot.freezeUses.has(iso)) classes.push('freeze');
       if (iso === todayISO()) classes.push('today');
-      if (iso === deadlineISO) classes.push('deadline');
-      cells.push(`<span class="${classes.join(' ')}">${d.getDate()}</span>`);
+      const label = snapshot.freezeUses.has(iso) ? d.getDate() + ' — streak freeze used' : days.has(iso) ? d.getDate() + ' — session complete' : String(d.getDate());
+      cells.push(`<span class="${classes.join(' ')}" aria-label="${label}">${d.getDate()}</span>`);
     }
     $('dotCal').innerHTML = cells.join('');
   }
@@ -1052,7 +1128,7 @@
     teardownSession();
     $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
     const sc = streakCount();
-    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' session' : ' sessions') + ' ✓';
+    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' ✓';
     renderLiftLog(finished);
     show('finish');
   }

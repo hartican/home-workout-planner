@@ -188,13 +188,15 @@ You wanted both a prompt and streak mechanic to interrupt the after-work beer re
 
 Streak definition:
 
-- Complete any session type (including fallback) within seven calendar days of the previous completed session.
-- The active streak expires after the seventh calendar day without a completed session.
+- Complete one session on every calendar day. Any session type, including fallback, qualifies.
+- A missed completed day automatically uses one banked streak freeze, if available. A freeze cannot protect more than one day.
+- The freeze bank starts at three, refills by one every rolling 30 days while below capacity, and never exceeds three.
 
 Visual streak:
 
-- Shows the number of qualifying completed sessions in the current rolling streak.
-- Shows how many days remain and the inclusive date by which the next session must be completed.
+- Shows the number of consecutive protected calendar days in the current streak.
+- Shows whether today's session is still required and the number of cheat-day freezes currently banked.
+- Marks a used freeze separately from a completed session in the calendar.
 - Encourages momentum and pattern disruption.
 
 Rules:
