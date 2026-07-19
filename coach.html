@@ -23,6 +23,7 @@
       --color-text:#28251d; --color-text-muted:#66645f; --color-text-faint:#8e8b84; --color-text-inverse:#f9f8f4;
       --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-soft:#d8e4e1;
       --color-amber:#96500f; --color-amber-soft:#f0e2cd;
+      --color-freeze:#4f6f91; --color-freeze-soft:#dfe8f0;
       --color-good:#437a22; --color-line:rgba(40,37,29,.12);
       --shadow:0 10px 30px rgba(20,25,26,.10);
       --font-display:'Instrument Serif', Georgia, serif; --font-body:'Inter', system-ui, sans-serif;
@@ -32,6 +33,7 @@
       --color-text:#e4e2dc; --color-text-muted:#a9aca6; --color-text-faint:#7c807b; --color-text-inverse:#15181a;
       --color-primary:#4f98a3; --color-primary-hover:#6fb3bd; --color-primary-soft:#233639;
       --color-amber:#d99a55; --color-amber-soft:#33291c;
+      --color-freeze:#8eb2d5; --color-freeze-soft:#222f3b;
       --color-good:#7db85a; --color-line:rgba(228,226,220,.14);
       --shadow:0 10px 30px rgba(0,0,0,.4);
     }
@@ -60,6 +62,28 @@
     .startbig:active{background:var(--color-primary-hover)}
     .startsecondary{width:100%;min-height:54px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);font-weight:700;font-size:var(--text-base);margin-top:.6rem}
     .sessionmeta{display:flex;gap:.9rem;margin:.9rem 0 0;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:600;letter-spacing:.02em;flex-wrap:wrap}
+
+    /* today momentum */
+    .todaystatus{margin:.8rem 0 1rem;padding:1rem 0;border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line)}
+    .todaystatushead{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+    .statuskicker{display:block;font-size:var(--text-xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary)}
+    .todaystatus h2{font-family:var(--font-display);font-weight:400;font-size:var(--text-xl);margin:.2rem 0}
+    .todaystatus p{margin:0;color:var(--color-text-muted);font-size:var(--text-sm)}
+    .levelbadge{flex:none;display:grid;place-items:center;min-width:48px;min-height:48px;border-radius:50%;background:var(--color-primary);color:var(--color-text-inverse);font-weight:800;font-size:var(--text-sm)}
+    .levelbadge.l2{background:var(--color-primary-hover)}
+    .levelbadge.l3{background:var(--color-amber)}
+    .momentumstats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0 0}
+    .momentumstats div{min-width:0}
+    .momentumstats dt{font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em}
+    .momentumstats dd{margin:.15rem 0 0;font-weight:800;font-variant-numeric:tabular-nums;font-size:var(--text-sm)}
+    .activityactions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem}
+    .activitybtn{min-height:44px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);padding:.55rem .9rem;font-size:var(--text-sm);font-weight:750}
+    .activitybtn.primary{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse)}
+    .atrisk{margin:.85rem 0;padding:.9rem 1rem;background:var(--color-amber-soft);border-left:3px solid var(--color-amber);border-radius:0 .9rem .9rem 0}
+    .atrisk strong{display:block;color:var(--color-amber);font-size:var(--text-sm)}
+    .atrisk p{margin:.15rem 0 .7rem;font-size:var(--text-sm)}
+    .promptactions{display:flex;gap:.45rem;flex-wrap:wrap}
+    .promptactions button{border:1px solid color-mix(in srgb, var(--color-amber) 35%, var(--color-line));background:var(--color-surface);color:var(--color-text);border-radius:999px;padding:.45rem .75rem;font-size:var(--text-xs);font-weight:750}
 
     .beercheck{margin-top:.9rem;background:var(--color-amber-soft);border:1px solid var(--color-line);border-radius:1rem;padding:.9rem 1rem;display:flex;gap:.75rem;align-items:center}
     .beercheck p{margin:0;font-size:var(--text-sm);color:var(--color-text)}
@@ -169,12 +193,27 @@
     .streakdeadline span{display:block;margin-top:.15rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .dotcal{display:grid;grid-template-columns:repeat(7,1fr);gap:.45rem;margin-top:1.2rem}
     .dotcal .dh{text-align:center;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:700}
-    .dotcal .dd{aspect-ratio:1;border-radius:50%;background:var(--color-surface-2);border:1px solid var(--color-line);display:grid;place-items:center;font-size:var(--text-xs);color:var(--color-text-faint)}
+    .dotcal .dd{position:relative;aspect-ratio:1;border-radius:50%;background:var(--color-surface-2);border:1px solid var(--color-line);display:grid;place-items:center;padding:0;font-size:var(--text-xs);color:var(--color-text-faint)}
     .dotcal .dd.othermonth{opacity:.42}
     .dotcal .dd.future{background:transparent}
-    .dotcal .dd.hit{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse);font-weight:700}
-    .dotcal .dd.freeze{background:var(--color-amber-soft);border-color:var(--color-amber);color:var(--color-amber);font-weight:700}
+    .dotcal .dd.l1{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse);font-weight:700}
+    .dotcal .dd.l2{background:var(--color-primary-hover);border-color:var(--color-primary-hover);color:var(--color-text-inverse);font-weight:700}
+    .dotcal .dd.l3{background:var(--color-amber);border-color:var(--color-amber);color:var(--color-text-inverse);font-weight:700}
+    .dotcal .dd.freeze{background:var(--color-freeze-soft);border-color:var(--color-freeze);color:var(--color-freeze);font-weight:700}
+    .dotcal .dd.bleed-low{box-shadow:0 0 0 4px color-mix(in srgb, var(--color-primary) 11%, transparent)}
+    .dotcal .dd.bleed-medium{box-shadow:0 0 0 5px color-mix(in srgb, var(--color-freeze) 20%, transparent)}
     .dotcal .dd.today{outline:2px solid var(--color-amber);outline-offset:2px}
+    .dotcal .levelmark{position:absolute;right:-.2rem;bottom:-.1rem;min-width:20px;height:14px;padding:0 .2rem;border-radius:999px;background:var(--color-surface);color:var(--color-primary);border:1px solid var(--color-line);font-size:.55rem;font-weight:800;line-height:12px}
+    .dotcal .freeze-mark{position:absolute;right:-.1rem;top:-.3rem;font-size:.72rem;line-height:1;color:var(--color-freeze);filter:drop-shadow(0 1px 0 var(--color-surface))}
+    .callegend{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1rem;font-size:var(--text-xs);color:var(--color-text-muted)}
+    .callegend span{display:flex;align-items:center;gap:.3rem}
+    .callegend i{width:9px;height:9px;border-radius:50%;background:var(--color-primary)}
+    .callegend .training{background:var(--color-primary-hover)}
+    .callegend .competition{background:var(--color-amber)}
+    .callegend .protected{background:var(--color-freeze)}
+    .streakprogress{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:0 0 1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--color-line)}
+    .streakprogress span{display:block;font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-faint);font-weight:700}
+    .streakprogress strong{display:block;margin-top:.15rem;font-size:var(--text-base)}
     .streakrules{margin-top:1.3rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .streakrules li{margin-bottom:.3rem}
 
@@ -198,8 +237,42 @@
     .databtns{display:grid;gap:.55rem}
     .databtn{display:block;width:100%;min-height:48px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);font-weight:700;font-size:var(--text-sm);text-align:center;padding:.7rem 1rem}
     .databtn.danger{border-color:color-mix(in srgb, var(--color-amber) 35%, var(--color-line));color:var(--color-amber)}
+    .settingsblock{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--color-line)}
+    .settingsblock h3{font-family:var(--font-display);font-size:var(--text-lg);font-weight:400;margin:0 0 .25rem}
+    .settingsblock > p{font-size:var(--text-sm);color:var(--color-text-muted);margin:.1rem 0 .8rem}
+    .settingrow{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.65rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
+    .settingrow input[type="time"]{border:1px solid var(--color-line);border-radius:.6rem;background:var(--color-surface-2);color:var(--color-text);padding:.45rem}
+    .settingrow input[type="checkbox"]{width:20px;height:20px;accent-color:var(--color-primary)}
+    .sportsetting{border-bottom:1px solid var(--color-line)}
+    .sportsetting summary{padding:.7rem 0;font-weight:700;cursor:pointer;font-size:var(--text-sm)}
+    .sportsettingbody{padding:0 0 .8rem;display:grid;gap:.65rem}
+    .sportsettingbody > label{display:grid;gap:.25rem;font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted)}
+    .sportsettingbody input[type="text"]{width:100%;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.6rem;padding:.55rem}
+    .rangeline{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:center}
+    input[type="range"]{width:100%;accent-color:var(--color-primary)}
+    .rangevalue{font-variant-numeric:tabular-nums;color:var(--color-primary);font-weight:800}
+    .smallaction{border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:999px;padding:.5rem .8rem;font-size:var(--text-xs);font-weight:750}
+    .smallaction.danger{color:var(--color-amber)}
+
+    /* sport logging sheet */
+    .sportdialog{width:min(520px,calc(100% - 1.4rem));max-height:88dvh;margin:auto 0 0;border:1px solid var(--color-line);border-radius:1.4rem 1.4rem 0 0;background:var(--color-surface);color:var(--color-text);padding:1.1rem;box-shadow:var(--shadow)}
+    .sportdialog::backdrop{background:rgba(10,17,18,.48);backdrop-filter:blur(3px)}
+    .dialoghead{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+    .dialoghead h2{font-family:var(--font-display);font-size:var(--text-xl);font-weight:400}
+    .dialoghead p{font-size:var(--text-sm);color:var(--color-text-muted);margin:.25rem 0 .8rem}
+    .dialogclose{border:0;background:var(--color-surface-2);color:var(--color-text);width:38px;height:38px;border-radius:50%;font-size:1.2rem}
+    .sportchoices{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem}
+    .sportchoice{min-height:52px;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.9rem;padding:.65rem;font-weight:750;text-align:left}
+    .scorehead{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin:.7rem 0}
+    .scorehead strong{font-family:var(--font-display);font-size:var(--text-xl);font-weight:400}
+    .scorehead output{font-size:var(--text-xl);font-weight:800;color:var(--color-primary)}
+    .scorefields{display:grid;gap:.75rem}
+    .scorefield label{display:flex;justify-content:space-between;gap:1rem;font-size:var(--text-sm);font-weight:650}
+    .dialogactions{display:flex;gap:.6rem;margin-top:1rem}
+    .dialogactions .startbig{min-height:52px;font-size:var(--text-base)}
 
     :focus-visible{outline:3px solid var(--color-amber);outline-offset:2px}
+    @media (min-width:560px){.sportdialog{margin:auto;border-radius:1.4rem}}
     @media (prefers-reduced-motion: reduce){ *{transition:none !important;animation:none !important} }
   </style>
 </head>
@@ -222,6 +295,36 @@
         </div>
       </div>
       <div id="dayHelp" class="dayhelp" hidden role="region" aria-live="polite"></div>
+
+      <section class="todaystatus" aria-labelledby="todayStatusTitle" aria-live="polite">
+        <div class="todaystatushead">
+          <div>
+            <span class="statuskicker" id="todayStatusKicker">Today · incomplete</span>
+            <h2 id="todayStatusTitle">One move secures the day.</h2>
+            <p id="todayStatusCopy">A workout, quick start, or sport all count.</p>
+          </div>
+          <span class="levelbadge" id="todayLevelBadge" hidden>L1</span>
+        </div>
+        <dl class="momentumstats">
+          <div><dt>Sessions</dt><dd id="todaySessionCount">0</dd></div>
+          <div><dt>Freezes</dt><dd id="todayFreezeCount">0</dd></div>
+          <div><dt>Next freeze</dt><dd id="todayBonusProgress">0/3</dd></div>
+        </dl>
+        <div class="activityactions">
+          <button class="activitybtn" id="playedSportBtn" type="button">Played sport</button>
+          <button class="activitybtn primary" id="whichSportBtn" type="button" hidden>Which sport?</button>
+        </div>
+      </section>
+
+      <aside class="atrisk" id="atRiskPrompt" hidden>
+        <strong id="atRiskTitle">Your streak is at risk</strong>
+        <p id="atRiskCopy"></p>
+        <div class="promptactions">
+          <button id="promptWorkout" type="button">Workout now</button>
+          <button id="promptQuick" type="button">Quick start</button>
+          <button id="promptSport" type="button">Played sport</button>
+        </div>
+      </aside>
 
       <div class="coach" id="coachCard">
         <button class="modechip" id="goalChip" type="button">Goal: Visible abs</button>
@@ -366,17 +469,23 @@
       </div>
       <div class="streakdeadline" aria-live="polite">
         <strong id="streakTimeLeft">Complete a session to begin</strong>
-        <span id="streakDue">3 cheat days banked · bank full.</span>
+        <span id="streakDue">No streak freezes available yet.</span>
+      </div>
+      <div class="streakprogress">
+        <div><span>Streak freezes</span><strong id="streakFreezeCount">0 available</strong></div>
+        <div><span>Bonus workouts</span><strong id="streakBonusProgress">0/3 to next freeze</strong></div>
       </div>
       <div id="dotCalHeader" style="text-align:center;margin-top:.4rem;font-weight:700;color:var(--color-text-muted)"></div>
       <div class="dotcal" id="dotCal"></div>
+      <div class="callegend" aria-label="Calendar legend">
+        <span><i></i>L1 Maintenance</span><span><i class="training"></i>L2 Training</span><span><i class="competition"></i>L3 Competition</span><span><i class="protected"></i>Freeze</span>
+      </div>
       <ul class="streakrules">
-        <li>Complete one session every day to keep the streak alive.</li>
-        <li>Three cheat days are banked. One missed day uses one freeze.</li>
-        <li>When the bank is below three, one freeze returns every 30 days.</li>
-        <li>Any completed session counts — momentum resets count fully.</li>
-        <li>Travel days count fully.</li>
-        <li>The streak measures showing up, not intensity.</li>
+        <li>One qualifying session secures the day as L1.</li>
+        <li>Two sessions make L2 and add one bonus workout credit.</li>
+        <li>Three or more sessions make L3 and add two credits in total.</li>
+        <li>Every three bonus credits earns one automatic streak freeze.</li>
+        <li>A freeze is spent automatically on a missed day while your streak is active.</li>
       </ul>
     </section>
 
@@ -394,6 +503,22 @@
         <label>Time zone <input id="profileTZ" type="text" placeholder="e.g. America/Los_Angeles"></label>
         <label>Longitude <input id="profileLong" type="number" step="0.01"></label>
         <div style="display:flex;gap:.6rem;margin-top:.6rem"><button class="startbig" id="saveProfile">Save profile</button><button class="startsecondary" id="cancelProfile">Cancel</button></div>
+        <section class="settingsblock" aria-labelledby="reminderSettingsTitle">
+          <h3 id="reminderSettingsTitle">Daily movement reminder</h3>
+          <p>Coach can interrupt the evening drift while the app is open. Browser notifications are used when you allow them.</p>
+          <label class="settingrow"><span>Reminder enabled</span><input id="reminderEnabled" type="checkbox"></label>
+          <label class="settingrow"><span>Reminder time</span><input id="reminderTime" type="time"></label>
+          <label class="settingrow"><span>Training window starts</span><input id="trainingWindowStart" type="time"></label>
+          <label class="settingrow"><span>Training window ends</span><input id="trainingWindowEnd" type="time"></label>
+          <label class="settingrow"><span>Calendar bleed</span><input id="bleedEnabled" type="checkbox"></label>
+          <label class="settingrow"><span>Momentum explanations</span><input id="momentumExplanations" type="checkbox"></label>
+        </section>
+        <section class="settingsblock" aria-labelledby="sportSettingsTitle">
+          <h3 id="sportSettingsTitle">Configured sports</h3>
+          <p>Defaults secure the detail without turning sport logging into homework. You can tune each score from 1.0 to 3.0.</p>
+          <div id="sportSettings"></div>
+          <button class="smallaction" id="addSport" type="button" style="margin-top:.8rem">Add sport</button>
+        </section>
         <div class="localdata">
           <h3>Local data</h3>
           <p>Coach data lives only in this browser. Export a backup before clearing site data or moving phones.</p>
@@ -438,6 +563,22 @@
       <button class="bignext" id="nextBtn" type="button">Done — next</button>
     </div>
 
+    <dialog class="sportdialog" id="sportDialog" aria-labelledby="sportDialogTitle">
+      <div class="dialoghead">
+        <div>
+          <h2 id="sportDialogTitle">Which sport?</h2>
+          <p id="sportDialogCopy">Today is already secured. Pick the sport to finish the detail.</p>
+        </div>
+        <button class="dialogclose" id="sportDialogClose" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="sportchoices" id="sportChoices"></div>
+      <div id="sportScoreEditor" hidden>
+        <div class="scorehead"><strong id="sportScoreName">Sport logged</strong><output id="sportScoreAverage">1.0</output></div>
+        <div class="scorefields" id="sportScoreFields"></div>
+        <div class="dialogactions"><button class="startbig" id="saveSportScores" type="button">Save changes</button></div>
+      </div>
+    </dialog>
+
     <div class="toast" id="toast" role="status"></div>
   </div>
 
@@ -446,9 +587,20 @@
   'use strict';
   const KEY = 'hwc_state_v1';
   const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
-  const STREAK_FREEZE_MAX = 3;
-  const STREAK_FREEZE_REFILL_DAYS = 30;
-  const STREAK_SYSTEM_VERSION = 3;
+  const MOMENTUM_SYSTEM_VERSION = 1;
+  const SPORT_SCORE_FIELDS = [
+    ['durationScore','Duration'],
+    ['intensityScore','Intensity'],
+    ['lowerBodyScore','Lower body / glutes'],
+    ['upperBodyScore','Upper body'],
+    ['coreAlignmentScore','Core alignment']
+  ];
+  const DEFAULT_SPORTS = [
+    {id:'tennis', name:'Tennis', durationScore:2.5, intensityScore:2.5, lowerBodyScore:2.5, upperBodyScore:2.5, coreAlignmentScore:1.5},
+    {id:'run', name:'Running', durationScore:2, intensityScore:2.5, lowerBodyScore:2.5, upperBodyScore:1, coreAlignmentScore:2},
+    {id:'swim', name:'Swimming', durationScore:2, intensityScore:2, lowerBodyScore:1.5, upperBodyScore:2.5, coreAlignmentScore:2.5},
+    {id:'cycle', name:'Cycling', durationScore:2.5, intensityScore:2, lowerBodyScore:2.5, upperBodyScore:1, coreAlignmentScore:1.5}
+  ];
   const $ = id => document.getElementById(id);
   const yt = q => 'https://www.youtube.com/results?search_query=' + q;
 
@@ -487,32 +639,75 @@
 
   /* ---------- state ---------- */
   function todayISO(d){ const x=d||new Date(); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
-  function defaultState(){
-    return { startDate: todayISO(), goal:'abs', sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [], streakFreezes: STREAK_FREEZE_MAX, streakFreezeUses: [], streakFreezeAccrualDate: todayISO(), streakSystemVersion: STREAK_SYSTEM_VERSION, maxStreak: 0, profile: {name:'', avatar:'', height:null, age:null, sex:'', weight:null, fitnessLevel:'', timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', longitude:null} };
+  function newId(prefix){ return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); }
+  function clampInputScore(value){ return Math.max(1, Math.min(3, Math.round((Number(value) || 1) * 2) / 2)); }
+  function clampSessionScore(value){ return Math.max(1, Math.min(3, Math.round((Number(value) || 1) * 10) / 10)); }
+  function defaultSettings(){
+    return {reminderEnabled:true, reminderTimeLocal:'19:00', trainingWindowStartLocal:'17:00', trainingWindowEndLocal:'21:30', bleedEnabled:true, momentumExplanations:true, sports:DEFAULT_SPORTS.map(s => Object.assign({}, s))};
   }
-  function load(){ try{ const raw=localStorage.getItem(KEY); return raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState(); }catch(e){ return defaultState(); } }
+  function defaultState(){
+    return { startDate: todayISO(), goal:'abs', sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [], streakFreezeCount:0, streakFreezeUses:[], bonusWorkoutCounter:0, dayRewardLedger:{}, freezeEarnedByDate:{}, lastDayEvaluatedLocal:todayISO(), momentumSystemVersion:MOMENTUM_SYSTEM_VERSION, settings:defaultSettings(), maxStreak:0, profile:{name:'', avatar:'', height:null, age:null, sex:'', weight:null, fitnessLevel:'', timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', longitude:null} };
+  }
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      const merged = Object.assign(defaultState(), parsed);
+      if (!Object.prototype.hasOwnProperty.call(parsed, 'momentumSystemVersion')) merged.momentumSystemVersion = 0;
+      return merged;
+    }catch(e){ return defaultState(); }
+  }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
   let state = load();
-  function ensureStreakSystemState(){
-    if (state.streakSystemVersion !== STREAK_SYSTEM_VERSION){
-      state.streakFreezes = STREAK_FREEZE_MAX;
-      state.streakFreezeUses = [];
-      state.streakFreezeAccrualDate = todayISO();
-      state.streakSystemVersion = STREAK_SYSTEM_VERSION;
-      state.maxStreak = 0;
-      save();
-      return;
-    }
-    const safeFreezes = Math.max(0, Math.min(STREAK_FREEZE_MAX, Number(state.streakFreezes) || 0));
-    const safeUses = Array.isArray(state.streakFreezeUses) ? state.streakFreezeUses.filter(iso => typeof iso === 'string') : [];
-    if (safeFreezes !== state.streakFreezes || safeUses.length !== (state.streakFreezeUses || []).length || !state.streakFreezeAccrualDate){
-      state.streakFreezes = safeFreezes;
-      state.streakFreezeUses = safeUses;
-      state.streakFreezeAccrualDate = state.streakFreezeAccrualDate || todayISO();
-      save();
-    }
+  function normaliseSport(sport, index){
+    const safe = {id:String(sport && sport.id || 'sport-' + index), name:String(sport && sport.name || 'Sport ' + (index + 1))};
+    SPORT_SCORE_FIELDS.forEach(([key]) => { safe[key] = clampInputScore(sport && sport[key]); });
+    return safe;
   }
-  ensureStreakSystemState();
+  function normaliseSession(entry, index){
+    const source = entry && entry.sourceType || (entry && entry.mode === 'fallback' ? 'fallback' : entry && entry.mode === 'travel' ? 'travel' : 'guided');
+    return Object.assign({}, entry, {
+      sessionId:String(entry && entry.sessionId || 'legacy-' + String(entry && entry.date || todayISO()) + '-' + index),
+      date:String(entry && entry.date || todayISO()),
+      sourceType:source,
+      isProvisional:source === 'sport_provisional' ? true : !!(entry && entry.isProvisional),
+      sessionScore:clampSessionScore(entry && entry.sessionScore),
+      completedAtLocal:String(entry && entry.completedAtLocal || String(entry && entry.date || todayISO()) + 'T12:00:00')
+    });
+  }
+  function ensureMomentumState(){
+    const before = JSON.stringify(state);
+    state.sessions = (Array.isArray(state.sessions) ? state.sessions : []).map(normaliseSession);
+    const defaults = defaultSettings();
+    state.settings = Object.assign(defaults, state.settings || {});
+    state.settings.sports = Array.isArray(state.settings.sports) ? state.settings.sports.map(normaliseSport) : defaults.sports;
+
+    if (state.momentumSystemVersion !== MOMENTUM_SYSTEM_VERSION){
+      const counts = {};
+      state.sessions.forEach(s => { counts[s.date] = (counts[s.date] || 0) + 1; });
+      state.dayRewardLedger = {};
+      Object.keys(counts).forEach(date => { state.dayRewardLedger[date] = counts[date] >= 3 ? 2 : counts[date] === 2 ? 1 : 0; });
+      const legacyFreezes = state.streakFreezes != null ? Number(state.streakFreezes) : Number(state.streakFreezeCount);
+      state.streakFreezeCount = Math.max(0, Math.floor(legacyFreezes || 0));
+      state.streakFreezeUses = Array.isArray(state.streakFreezeUses) ? state.streakFreezeUses.filter(iso => !!parseISODate(iso)) : [];
+      state.bonusWorkoutCounter = 0;
+      state.freezeEarnedByDate = {};
+      state.lastDayEvaluatedLocal = todayISO();
+      state.momentumSystemVersion = MOMENTUM_SYSTEM_VERSION;
+    }
+
+    state.streakFreezeCount = Math.max(0, Math.floor(Number(state.streakFreezeCount) || 0));
+    state.streakFreezeUses = [...new Set(Array.isArray(state.streakFreezeUses) ? state.streakFreezeUses.filter(iso => !!parseISODate(iso)) : [])].sort();
+    state.dayRewardLedger = state.dayRewardLedger && typeof state.dayRewardLedger === 'object' ? state.dayRewardLedger : {};
+    state.freezeEarnedByDate = state.freezeEarnedByDate && typeof state.freezeEarnedByDate === 'object' ? state.freezeEarnedByDate : {};
+    const bonusTotal = Math.max(0, Math.floor(Number(state.bonusWorkoutCounter) || 0));
+    if (bonusTotal >= 3){ state.streakFreezeCount += Math.floor(bonusTotal / 3); }
+    state.bonusWorkoutCounter = bonusTotal % 3;
+    state.lastDayEvaluatedLocal = parseISODate(state.lastDayEvaluatedLocal) ? state.lastDayEvaluatedLocal : todayISO();
+    if (JSON.stringify(state) !== before) save();
+  }
+  ensureMomentumState();
 
   const GOALS = {abs:'Visible abs', chain:'Anterior & posterior chain', upper:'Upper body'};
 
@@ -548,9 +743,57 @@
   function calendarDayNumber(d){ return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000; }
   function daysBetween(a, b){ return calendarDayNumber(b) - calendarDayNumber(a); }
   function addDays(d, amount){ const next = new Date(d); next.setDate(next.getDate() + amount); return next; }
+  function isQualifyingSession(s){ return !!(s && parseISODate(s.date) && clampSessionScore(s.sessionScore) >= 1); }
+  function sessionsForDate(iso){ return state.sessions.filter(s => s.date === iso && isQualifyingSession(s)); }
+  function levelForCount(count){ return count >= 3 ? 'L3' : count === 2 ? 'L2' : count === 1 ? 'L1' : 'L0'; }
+  function levelCredits(level){ return level === 'L3' ? 2 : level === 'L2' ? 1 : 0; }
+  function daySummary(iso){
+    const sessions = sessionsForDate(iso);
+    const count = sessions.length;
+    const level = levelForCount(count);
+    const scores = sessions.map(s => clampSessionScore(s.sessionScore));
+    return {
+      date:iso,
+      isSecured:count > 0,
+      isFreezeSaved:(state.streakFreezeUses || []).includes(iso),
+      level,
+      sessionCountCapped:Math.min(3, count),
+      totalSessionsLogged:count,
+      heatScore:scores.length ? Math.max.apply(null, scores) : 0,
+      freezeEarnedToday:Math.max(0, Number((state.freezeEarnedByDate || {})[iso]) || 0),
+      freezeUsedToday:(state.streakFreezeUses || []).includes(iso),
+      sessions
+    };
+  }
+  function applyDayRewards(iso){
+    const summary = daySummary(iso);
+    const desired = levelCredits(summary.level);
+    const previous = Math.max(0, Number(state.dayRewardLedger[iso]) || 0);
+    const added = Math.max(0, desired - previous);
+    let freezesEarned = 0;
+    state.dayRewardLedger[iso] = Math.max(previous, desired);
+    if (added > 0){
+      const progress = state.bonusWorkoutCounter + added;
+      freezesEarned = Math.floor(progress / 3);
+      state.bonusWorkoutCounter = progress % 3;
+      if (freezesEarned > 0){
+        state.streakFreezeCount += freezesEarned;
+        state.freezeEarnedByDate[iso] = (Number(state.freezeEarnedByDate[iso]) || 0) + freezesEarned;
+      }
+    }
+    save();
+    return {level:summary.level, bonusAdded:added, freezesEarned};
+  }
+  function registerSession(entry){
+    const rec = normaliseSession(entry, state.sessions.length);
+    state.sessions.push(rec);
+    const reward = applyDayRewards(rec.date);
+    save();
+    return {session:rec, reward};
+  }
   function sessionDates(referenceDate){
     const refDay = calendarDayNumber(referenceDate || new Date());
-    return [...new Set(state.sessions.map(s => s.date))]
+    return [...new Set(state.sessions.filter(isQualifyingSession).map(s => s.date))]
       .map(parseISODate)
       .filter(d => d && calendarDayNumber(d) <= refDay)
       .sort((a, b) => calendarDayNumber(a) - calendarDayNumber(b));
@@ -563,48 +806,30 @@
       return d && calendarDayNumber(d) <= refDay;
     }));
   }
-  function replenishFreezeBank(referenceDate){
-    const today = referenceDate || new Date();
-    if (state.streakFreezes >= STREAK_FREEZE_MAX) return false;
-    const accrualDate = parseISODate(state.streakFreezeAccrualDate) || today;
-    const credits = Math.min(STREAK_FREEZE_MAX - state.streakFreezes, Math.floor(daysBetween(accrualDate, today) / STREAK_FREEZE_REFILL_DAYS));
-    if (credits <= 0) return false;
-    state.streakFreezes += credits;
-    state.streakFreezeAccrualDate = todayISO(state.streakFreezes === STREAK_FREEZE_MAX ? today : addDays(accrualDate, credits * STREAK_FREEZE_REFILL_DAYS));
-    return true;
-  }
   function reconcileDailyStreak(referenceDate){
     const today = referenceDate || new Date();
     const sessions = sessionDaySet(today);
     const freezes = freezeUseSet(today);
-    let changed = replenishFreezeBank(today);
-    if (!sessions.size){
-      if (changed) save();
-      return {sessions, freezes, protectedDays:new Set(), changed};
-    }
-
-    const startDate = parseISODate(state.startDate) || today;
-    const anchor = sessions.has(todayISO(today)) ? new Date(today) : addDays(today, -1);
-    const protectedDays = new Set();
-    const bankWasFull = state.streakFreezes === STREAK_FREEZE_MAX;
-    let earliestNewFreeze = null;
-    for (let d = anchor; calendarDayNumber(d) >= calendarDayNumber(startDate); d = addDays(d, -1)){
+    let changed = false;
+    let lastEvaluation = parseISODate(state.lastDayEvaluatedLocal) || today;
+    if (calendarDayNumber(lastEvaluation) > calendarDayNumber(today)) lastEvaluation = today;
+    const yesterday = addDays(today, -1);
+    for (let d = new Date(lastEvaluation); calendarDayNumber(d) <= calendarDayNumber(yesterday); d = addDays(d, 1)){
       const iso = todayISO(d);
-      if (sessions.has(iso) || freezes.has(iso)){
-        protectedDays.add(iso);
-        continue;
+      if (sessions.has(iso) || freezes.has(iso)) continue;
+      const previousISO = todayISO(addDays(d, -1));
+      const streakWasActive = sessions.has(previousISO) || freezes.has(previousISO);
+      if (streakWasActive && state.streakFreezeCount > 0){
+        state.streakFreezeCount--;
+        freezes.add(iso);
+        changed = true;
       }
-      if (state.streakFreezes <= 0) break;
-      state.streakFreezes--;
-      freezes.add(iso);
-      state.streakFreezeUses = [...freezes].sort();
-      earliestNewFreeze = iso;
-      protectedDays.add(iso);
-      changed = true;
     }
-    if (earliestNewFreeze && (bankWasFull || !parseISODate(state.streakFreezeAccrualDate))) state.streakFreezeAccrualDate = earliestNewFreeze;
+    if (state.lastDayEvaluatedLocal !== todayISO(today)) changed = true;
+    state.lastDayEvaluatedLocal = todayISO(today);
+    state.streakFreezeUses = [...freezes].sort();
     if (changed) save();
-    return {sessions, freezes, protectedDays, changed};
+    return {sessions, freezes, changed};
   }
   function countTrailingDays(protectedDays, referenceDate){
     const today = referenceDate || new Date();
@@ -630,8 +855,7 @@
     const count = countTrailingDays(protectedDays, today);
     const best = bestDailyStreak(protectedDays);
     const hasSessionToday = reconciled.sessions.has(todayISO(today));
-    const nextFreeze = state.streakFreezes < STREAK_FREEZE_MAX ? addDays(parseISODate(state.streakFreezeAccrualDate) || today, STREAK_FREEZE_REFILL_DAYS) : null;
-    return {count, best, active:count > 0, hasSessionToday, freezes:state.streakFreezes, sessions:reconciled.sessions, freezeUses:reconciled.freezes, nextFreeze};
+    return {count, best, active:count > 0, hasSessionToday, freezes:state.streakFreezeCount, sessions:reconciled.sessions, freezeUses:reconciled.freezes};
   }
   function streakCount(){
     const snapshot = streakSnapshot();
@@ -819,6 +1043,7 @@
     const emphasis = (quiz.train === 'travel' || quiz.train === 'goal') ? 'goal' : quiz.train;
     // pass time budget to the session builder so it can tune rests and length
     pending = buildSession(mode, {emphasis, time: Number(quiz.time)});
+    pending.sourceType = mode === 'fallback' ? 'fallback' : mode === 'travel' ? 'travel' : 'guided';
     pending.reason = modeReason(mode, Number(quiz.time), emphasis, 'quiz');
     pendingQuick = false;
     renderPreview('Built from your check-in. This is the whole session — nothing else today.');
@@ -833,9 +1058,18 @@
     const emphs = state.goal === 'abs' ? ['goal','goal','core','legs','push'] : state.goal === 'chain' ? ['goal','goal','legs','core','push'] : ['goal','goal','push','core','legs'];
     const emphasis = emphs[Math.floor(Math.random()*emphs.length)];
     pending = buildSession(mode, {emphasis, seed: Math.floor(Math.random()*97)});
+    pending.sourceType = 'quick_start';
     pending.reason = modeReason(mode, null, emphasis, 'quick');
     pendingQuick = true;
     renderPreview('Rolled inside your limits, pointed at the goal. Don’t overthink it.');
+    show('preview');
+  }
+  function momentumQuickStart(){
+    pending = buildSession('fallback', {emphasis:'goal', time:10});
+    pending.sourceType = 'quick_start';
+    pending.reason = 'The shortest viable reset. One completed round secures today.';
+    pendingQuick = false;
+    renderPreview('Five focused minutes. The day counts as soon as this is done.');
     show('preview');
   }
   $('quickStartBtn').addEventListener('click', quickStart);
@@ -856,30 +1090,166 @@
   }
   $('previewBack').addEventListener('click', () => { pending = null; show('today'); });
   $('beginBtn').addEventListener('click', () => { if (pending) startSession(pending); });
-  $('beerStart').addEventListener('click', () => { startSession(buildSession('fallback', {})); });
+  $('beerStart').addEventListener('click', () => { const built = buildSession('fallback', {}); built.sourceType = 'fallback'; startSession(built); });
 
   /* ---------- views ---------- */
   const views = ['today','quiz','preview','player','finish','plan','library','streak','profile'];
   function show(v){
     views.forEach(x => $('view-'+x).classList.toggle('hiddenview', x !== v));
     document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+    if (v === 'profile') renderProfile();
     window.scrollTo(0,0);
   }
   document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { if (!session) show(b.dataset.view); }));
 
   function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1600); }
 
+  function escapeHTML(value){ return String(value == null ? '' : value).replace(/[&<>\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch])); }
+  function localDateTimeString(d){
+    const x = d || new Date();
+    return todayISO(x) + 'T' + String(x.getHours()).padStart(2,'0') + ':' + String(x.getMinutes()).padStart(2,'0') + ':' + String(x.getSeconds()).padStart(2,'0');
+  }
+  function averageSportScores(value){
+    const total = SPORT_SCORE_FIELDS.reduce((sum, [key]) => sum + clampInputScore(value[key]), 0);
+    return Math.round((total / SPORT_SCORE_FIELDS.length) * 10) / 10;
+  }
+  function latestProvisionalSport(){
+    return state.sessions.slice().reverse().find(s => s.date === todayISO() && s.sourceType === 'sport_provisional' && s.isProvisional);
+  }
+  function rewardMessage(reward){
+    if (reward.freezesEarned) return ' Streak freeze earned.';
+    if (reward.bonusAdded) return ' +' + reward.bonusAdded + ' bonus workout credit.';
+    return '';
+  }
+  function logProvisionalSport(){
+    const result = registerSession({sessionId:newId('sport'), date:todayISO(), sourceType:'sport_provisional', isProvisional:true, sessionScore:1, completedAtLocal:localDateTimeString()});
+    renderToday(); renderStreak();
+    toast('Activity logged. Streak extended.' + rewardMessage(result.reward));
+  }
+  function defaultWorkout(){
+    pending = buildSession('standard', {emphasis:'goal', time:20});
+    pending.sourceType = 'guided';
+    pending.reason = modeReason('standard', 20, 'goal', 'quiz');
+    pendingQuick = false;
+    renderPreview('A clear guided session for right now.');
+    show('preview');
+  }
+  function timeInMinutes(value){ const parts = String(value || '00:00').split(':'); return Number(parts[0]) * 60 + Number(parts[1]); }
+  function withinTrainingWindow(){
+    const now = new Date();
+    const current = now.getHours() * 60 + now.getMinutes();
+    const start = timeInMinutes(state.settings.trainingWindowStartLocal);
+    const end = timeInMinutes(state.settings.trainingWindowEndLocal);
+    return start <= end ? current >= start && current <= end : current >= start || current <= end;
+  }
+
   function renderToday(){
     const tod = timeOfDay();
+    const snapshot = streakSnapshot();
+    const summary = daySummary(todayISO());
     $('dayLabel').textContent = tod === 'am' ? 'AM reset' : tod === 'pm' ? 'PM full' : 'Daytime';
     $('goalChip').textContent = 'Goal: ' + GOALS[state.goal];
     $('coachHeadline').textContent = tod === 'am' ? 'Bank it before breakfast.' : tod === 'pm' ? 'Twenty minutes. Then the evening is yours.' : 'A gap in the day is all this needs.';
     const t = targets();
     $('sessionMeta').innerHTML = `<span>Week ${weekNumber()}</span><span>Push ${t.push}</span><span>Squat ${t.squatReps}×${t.squatKg} kg</span><span>Plank ${t.plank}s</span>`;
-    const doneToday = state.sessions.some(s => s.date === todayISO());
-    $('beerCheck').hidden = !(tod === 'pm' && !doneToday);
+    $('beerCheck').hidden = !(tod === 'pm' && !summary.isSecured);
+    $('todayStatusKicker').textContent = 'Today · ' + (summary.isFreezeSaved ? 'protected' : summary.isSecured ? 'secured' : 'incomplete');
+    $('todayLevelBadge').hidden = summary.level === 'L0';
+    $('todayLevelBadge').textContent = summary.level;
+    $('todayLevelBadge').className = 'levelbadge ' + summary.level.toLowerCase();
+    const levelText = summary.level === 'L3' ? ['L3: Competition day','This is a bank-the-win kind of effort.'] : summary.level === 'L2' ? ['L2: Training day','You’re banking extra momentum.'] : summary.level === 'L1' ? ['Today is secured','You’ve secured today. Everything else is bonus.'] : ['One move secures the day','A workout, quick start, or sport all count.'];
+    $('todayStatusTitle').textContent = levelText[0];
+    const latestSport = summary.sessions.slice().reverse().find(s => s.sportName);
+    $('todayStatusCopy').textContent = levelText[1] + (latestSport ? ' ' + latestSport.sportName + ' scored ' + clampSessionScore(latestSport.sessionScore).toFixed(1) + '.' : '');
+    $('todaySessionCount').textContent = summary.totalSessionsLogged + (summary.totalSessionsLogged >= 3 ? '+' : '');
+    $('todayFreezeCount').textContent = state.streakFreezeCount;
+    $('todayBonusProgress').textContent = state.bonusWorkoutCounter + '/3';
+    $('whichSportBtn').hidden = !latestProvisionalSport();
+
+    const atRisk = !summary.isSecured && snapshot.active && withinTrainingWindow();
+    $('atRiskPrompt').hidden = !atRisk;
+    if (atRisk){
+      $('atRiskTitle').textContent = snapshot.count >= 3 ? snapshot.count + '-day streak at risk' : 'Your streak is at risk';
+      $('atRiskCopy').textContent = snapshot.freezes > 0
+        ? 'You can burn a streak freeze tonight, or bank a 5-minute quick session and keep it for a real emergency.'
+        : 'You’re 1 day from breaking your streak. Bank a 5-minute quick session now and lock today in.';
+    }
   }
+  $('playedSportBtn').addEventListener('click', logProvisionalSport);
+  $('whichSportBtn').addEventListener('click', () => openSportDialog());
+  $('promptWorkout').addEventListener('click', defaultWorkout);
+  $('promptQuick').addEventListener('click', momentumQuickStart);
+  $('promptSport').addEventListener('click', logProvisionalSport);
   $('goalChip').addEventListener('click', () => { show('plan'); });
+
+  /* ---------- provisional sport logging ---------- */
+  let activeSportSessionId = null;
+  function findSession(id){ return state.sessions.find(s => s.sessionId === id); }
+  function renderSportChoices(){
+    const sports = state.settings.sports || [];
+    $('sportChoices').innerHTML = sports.length
+      ? sports.map(s => `<button class="sportchoice" type="button" data-sport-id="${escapeHTML(s.id)}">${escapeHTML(s.name)}</button>`).join('')
+      : '<p style="grid-column:1/-1;color:var(--color-text-muted);font-size:var(--text-sm)">Add a sport in Profile settings first.</p>';
+  }
+  function openSportDialog(sessionId){
+    const provisional = sessionId ? findSession(sessionId) : latestProvisionalSport();
+    if (!provisional){ toast('No sport is waiting for details.'); return; }
+    activeSportSessionId = provisional.sessionId;
+    $('sportDialogTitle').textContent = 'Which sport?';
+    $('sportDialogCopy').textContent = 'Today is already secured. Pick the sport to finish the detail.';
+    $('sportChoices').hidden = false;
+    $('sportScoreEditor').hidden = true;
+    renderSportChoices();
+    if (!$('sportDialog').open) $('sportDialog').showModal();
+  }
+  function renderSportScoreEditor(sessionEntry){
+    $('sportDialogTitle').textContent = 'Activity logged';
+    $('sportDialogCopy').textContent = 'The defaults are already saved. Tune anything that felt different.';
+    $('sportChoices').hidden = true;
+    $('sportScoreEditor').hidden = false;
+    $('sportScoreName').textContent = sessionEntry.sportName;
+    $('sportScoreAverage').textContent = averageSportScores(sessionEntry).toFixed(1);
+    $('sportScoreFields').innerHTML = SPORT_SCORE_FIELDS.map(([key, label]) => `
+      <div class="scorefield">
+        <label for="score-${key}"><span>${label}</span><output class="rangevalue" data-score-output="${key}">${clampInputScore(sessionEntry[key]).toFixed(1)}</output></label>
+        <input id="score-${key}" data-score-field="${key}" type="range" min="1" max="3" step="0.5" value="${clampInputScore(sessionEntry[key])}">
+      </div>`).join('');
+  }
+  $('sportChoices').addEventListener('click', e => {
+    const button = e.target.closest('[data-sport-id]');
+    if (!button) return;
+    const sport = state.settings.sports.find(s => s.id === button.dataset.sportId);
+    const entry = findSession(activeSportSessionId);
+    if (!sport || !entry) return;
+    entry.sourceType = 'sport_resolved';
+    entry.isProvisional = false;
+    entry.sportId = sport.id;
+    entry.sportName = sport.name;
+    SPORT_SCORE_FIELDS.forEach(([key]) => { entry[key] = clampInputScore(sport[key]); });
+    entry.sessionScore = averageSportScores(entry);
+    save();
+    renderToday(); renderStreak();
+    renderSportScoreEditor(entry);
+  });
+  $('sportScoreFields').addEventListener('input', e => {
+    const input = e.target.closest('[data-score-field]');
+    if (!input) return;
+    const output = $('sportScoreFields').querySelector('[data-score-output="' + input.dataset.scoreField + '"]');
+    if (output) output.textContent = clampInputScore(input.value).toFixed(1);
+    const values = {};
+    $('sportScoreFields').querySelectorAll('[data-score-field]').forEach(field => { values[field.dataset.scoreField] = field.value; });
+    $('sportScoreAverage').textContent = averageSportScores(values).toFixed(1);
+  });
+  $('saveSportScores').addEventListener('click', () => {
+    const entry = findSession(activeSportSessionId);
+    if (!entry) return;
+    $('sportScoreFields').querySelectorAll('[data-score-field]').forEach(field => { entry[field.dataset.scoreField] = clampInputScore(field.value); });
+    entry.sessionScore = averageSportScores(entry);
+    save(); renderToday(); renderStreak();
+    $('sportDialog').close();
+    toast(entry.sportName + ' logged at ' + entry.sessionScore.toFixed(1) + '.');
+  });
+  $('sportDialogClose').addEventListener('click', () => $('sportDialog').close());
 
   function renderPlan(){
     const wk = weekNumber();
@@ -913,7 +1283,67 @@
     $('profileLevel').value = p.fitnessLevel || '';
     $('profileTZ').value = p.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     $('profileLong').value = p.longitude || '';
+    $('reminderEnabled').checked = state.settings.reminderEnabled !== false;
+    $('reminderTime').value = state.settings.reminderTimeLocal || '19:00';
+    $('trainingWindowStart').value = state.settings.trainingWindowStartLocal || '17:00';
+    $('trainingWindowEnd').value = state.settings.trainingWindowEndLocal || '21:30';
+    $('bleedEnabled').checked = state.settings.bleedEnabled !== false;
+    $('momentumExplanations').checked = state.settings.momentumExplanations !== false;
+    renderSportSettings();
   }
+  function renderSportSettings(){
+    $('sportSettings').innerHTML = (state.settings.sports || []).map(sport => `
+      <details class="sportsetting" data-sport-setting="${escapeHTML(sport.id)}">
+        <summary>${escapeHTML(sport.name)}</summary>
+        <div class="sportsettingbody">
+          <label>Sport name<input type="text" data-sport-setting-field="name" value="${escapeHTML(sport.name)}"></label>
+          ${SPORT_SCORE_FIELDS.map(([key, label]) => `
+            <label>${label}
+              <span class="rangeline"><input type="range" min="1" max="3" step="0.5" data-sport-setting-field="${key}" value="${clampInputScore(sport[key])}"><output class="rangevalue">${clampInputScore(sport[key]).toFixed(1)}</output></span>
+            </label>`).join('')}
+          <button class="smallaction danger" type="button" data-remove-sport="${escapeHTML(sport.id)}">Remove sport</button>
+        </div>
+      </details>`).join('');
+  }
+  ['reminderEnabled','reminderTime','trainingWindowStart','trainingWindowEnd','bleedEnabled','momentumExplanations'].forEach(id => {
+    $(id).addEventListener('change', async e => {
+      const mapping = {reminderEnabled:'reminderEnabled', reminderTime:'reminderTimeLocal', trainingWindowStart:'trainingWindowStartLocal', trainingWindowEnd:'trainingWindowEndLocal', bleedEnabled:'bleedEnabled', momentumExplanations:'momentumExplanations'};
+      const key = mapping[id];
+      state.settings[key] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      save(); renderToday(); renderStreak();
+      if (id === 'reminderEnabled' && e.target.checked && 'Notification' in window && Notification.permission === 'default'){
+        try{ await Notification.requestPermission(); }catch(err){}
+      }
+      scheduleDailyReminder();
+    });
+  });
+  $('sportSettings').addEventListener('input', e => {
+    const field = e.target.closest('[data-sport-setting-field]');
+    if (!field || field.type !== 'range') return;
+    const output = field.parentElement.querySelector('output');
+    if (output) output.textContent = clampInputScore(field.value).toFixed(1);
+  });
+  $('sportSettings').addEventListener('change', e => {
+    const field = e.target.closest('[data-sport-setting-field]');
+    const block = e.target.closest('[data-sport-setting]');
+    if (!field || !block) return;
+    const sport = state.settings.sports.find(s => s.id === block.dataset.sportSetting);
+    if (!sport) return;
+    sport[field.dataset.sportSettingField] = field.dataset.sportSettingField === 'name' ? (field.value.trim() || sport.name) : clampInputScore(field.value);
+    save(); renderSportSettings();
+  });
+  $('sportSettings').addEventListener('click', e => {
+    const button = e.target.closest('[data-remove-sport]');
+    if (!button) return;
+    state.settings.sports = state.settings.sports.filter(s => s.id !== button.dataset.removeSport);
+    save(); renderSportSettings();
+  });
+  $('addSport').addEventListener('click', () => {
+    state.settings.sports.push({id:newId('sport'), name:'New sport', durationScore:1, intensityScore:1, lowerBodyScore:1, upperBodyScore:1, coreAlignmentScore:1});
+    save(); renderSportSettings();
+    const items = $('sportSettings').querySelectorAll('details');
+    if (items.length) items[items.length - 1].open = true;
+  });
   document.addEventListener('click', e => {
     if (e.target && e.target.id === 'saveProfile'){
       const p = state.profile || {};
@@ -949,6 +1379,8 @@
         const imported = parsed.state || parsed;
         if (!validImportState(imported)) throw new Error('Invalid Coach backup');
         state = Object.assign(defaultState(), imported);
+        if (!Object.prototype.hasOwnProperty.call(imported, 'momentumSystemVersion')) state.momentumSystemVersion = 0;
+        ensureMomentumState();
         save();
         toast('Backup imported');
         window.setTimeout(() => window.location.reload(), 500);
@@ -993,6 +1425,30 @@
     renderLibrary();
   });
 
+  function bleedStrengthFor(iso){
+    if (state.settings.bleedEnabled === false) return 0;
+    const target = parseISODate(iso);
+    if (!target) return 0;
+    let strength = 0;
+    for (let offset=-2; offset<=2; offset++){
+      if (offset === 0) continue;
+      const source = daySummary(todayISO(addDays(target, offset)));
+      const distance = Math.abs(offset);
+      if (source.isFreezeSaved && distance === 1) strength = Math.max(strength, 2);
+      if (source.level === 'L3') strength = Math.max(strength, distance === 1 ? 2 : 1);
+      if (source.level === 'L2' && distance === 1) strength = Math.max(strength, 1);
+    }
+    return strength;
+  }
+  function calendarDetail(d, summary, bleed){
+    const dateLabel = d.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'});
+    if (summary.isFreezeSaved) return dateLabel + ' — streak freeze used here';
+    if (summary.level === 'L3') return dateLabel + ' — L3: Competition (' + summary.totalSessionsLogged + ' sessions, +2 bonus workouts)';
+    if (summary.level === 'L2') return dateLabel + ' — L2: Training (2 sessions, +1 bonus workout)';
+    if (summary.level === 'L1') return dateLabel + ' — L1: Maintenance (1 session)';
+    if (bleed && state.settings.momentumExplanations !== false) return dateLabel + ' — carry-over momentum. A short session keeps the run alive.';
+    return dateLabel + ' — no activity logged';
+  }
   function renderStreak(){
     const snapshot = streakSnapshot();
     if (snapshot.best !== (Number(state.maxStreak) || 0)){
@@ -1001,19 +1457,19 @@
     }
     $('streakBig').textContent = snapshot.count;
     $('streakCap').textContent = 'day streak · best ' + snapshot.best;
-    const freezeLabel = snapshot.freezes + (snapshot.freezes === 1 ? ' cheat day banked' : ' cheat days banked');
-    const freezeDetail = snapshot.nextFreeze ? ' · next freeze ' + snapshot.nextFreeze.toLocaleDateString(undefined, {day:'numeric', month:'short'}) : ' · bank full';
+    const freezeLabel = snapshot.freezes + (snapshot.freezes === 1 ? ' streak freeze available' : ' streak freezes available');
     if (!snapshot.active){
       $('streakTimeLeft').textContent = 'Complete a session to begin';
-      $('streakDue').textContent = freezeLabel + freezeDetail + '.';
+      $('streakDue').textContent = freezeLabel + '.';
     } else if (snapshot.hasSessionToday){
       $('streakTimeLeft').textContent = 'Streak secured today';
-      $('streakDue').textContent = freezeLabel + freezeDetail + '.';
+      $('streakDue').textContent = freezeLabel + '.';
     } else {
       $('streakTimeLeft').textContent = 'Complete today to keep it';
-      $('streakDue').textContent = freezeLabel + freezeDetail + '.';
+      $('streakDue').textContent = freezeLabel + '.';
     }
-    const days = snapshot.sessions || new Set(state.sessions.map(s=>s.date));
+    $('streakFreezeCount').textContent = snapshot.freezes + ' available';
+    $('streakBonusProgress').textContent = state.bonusWorkoutCounter + '/3 to next freeze';
     const cells = ['M','T','W','T','F','S','S'].map(d=>`<span class="dh">${d}</span>`);
     const today = new Date();
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1, 12);
@@ -1024,17 +1480,27 @@
     for (let i=0;i<=daysBetween(start, end);i++){
       const d = new Date(start); d.setDate(start.getDate()+i);
       const iso = todayISO(d);
+      const summary = daySummary(iso);
+      const bleed = summary.isSecured || summary.isFreezeSaved ? 0 : bleedStrengthFor(iso);
       const classes = ['dd'];
       if (d.getMonth() !== today.getMonth()) classes.push('othermonth');
       if (calendarDayNumber(d) > calendarDayNumber(today)) classes.push('future');
-      if (days.has(iso)) classes.push('hit');
-      if (snapshot.freezeUses.has(iso)) classes.push('freeze');
+      if (summary.level !== 'L0') classes.push(summary.level.toLowerCase());
+      if (summary.isFreezeSaved) classes.push('freeze');
+      if (bleed === 1) classes.push('bleed-low');
+      if (bleed === 2) classes.push('bleed-medium');
       if (iso === todayISO()) classes.push('today');
-      const label = snapshot.freezeUses.has(iso) ? d.getDate() + ' — streak freeze used' : days.has(iso) ? d.getDate() + ' — session complete' : String(d.getDate());
-      cells.push(`<span class="${classes.join(' ')}" aria-label="${label}">${d.getDate()}</span>`);
+      const detail = calendarDetail(d, summary, bleed);
+      const marker = summary.freezeUsedToday ? '<span class="freeze-mark" aria-hidden="true">❄</span>' : summary.freezeEarnedToday ? '<span class="freeze-mark" aria-hidden="true">❄+</span>' : '';
+      const level = summary.level !== 'L0' ? `<span class="levelmark" aria-hidden="true">${summary.level}</span>` : '';
+      cells.push(`<button type="button" class="${classes.join(' ')}" aria-label="${escapeHTML(detail)}" title="${escapeHTML(detail)}" data-cal-detail="${escapeHTML(detail)}">${d.getDate()}${level}${marker}</button>`);
     }
     $('dotCal').innerHTML = cells.join('');
   }
+  $('dotCal').addEventListener('click', e => {
+    const cell = e.target.closest('[data-cal-detail]');
+    if (cell) toast(cell.dataset.calDetail);
+  });
 
   /* ---------- player ---------- */
   let session = null, stepIdx = 0, elapsed = 0, ticker = null, paused = false, resting = false, restLeft = 0;
@@ -1118,8 +1584,8 @@
   function teardownSession(){ clearInterval(ticker); session = null; pending = null; document.body.classList.remove('in-session'); }
 
   function completeSession(){
-    const rec = {date: todayISO(), mode: session.mode, seconds: elapsed, week: session.week};
-    state.sessions.push(rec);
+    const rec = {sessionId:newId('session'), date:todayISO(), mode:session.mode, sourceType:session.sourceType || (session.mode === 'fallback' ? 'fallback' : session.mode === 'travel' ? 'travel' : 'guided'), isProvisional:false, sessionScore:1, seconds:elapsed, week:session.week, completedAtLocal:localDateTimeString()};
+    const result = registerSession(rec);
     state.lastHashes.push(session.hash); state.lastHashes = state.lastHashes.slice(-4);
     save();
     const mode = session.mode;
@@ -1128,7 +1594,7 @@
     teardownSession();
     $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
     const sc = streakCount();
-    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' ✓';
+    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' · ' + result.reward.level + rewardMessage(result.reward) + ' ✓';
     renderLiftLog(finished);
     show('finish');
   }
@@ -1230,22 +1696,70 @@
   if ('serviceWorker' in navigator){
     navigator.serviceWorker.register('/sw.js').then(reg => { reg.update().catch(()=>{}); }).catch(()=>{});
   }
-  // Reminder: schedule a 19:30 (7:30pm) reminder to workout if not done today
-  (function scheduleReminder(){
+  let reminderTimer = null;
+  function reminderCopy(){
+    const snapshot = streakSnapshot();
+    if (snapshot.active && snapshot.freezes > 0) return 'Use a 5-minute quick start and keep your streak freeze for a real emergency.';
+    if (snapshot.active) return 'A 5-minute quick start locks today in before your streak breaks.';
+    return 'A short session or sport log is enough to secure today.';
+  }
+  async function fireDailyReminder(){
+    if (daySummary(todayISO()).isSecured) return;
+    const body = reminderCopy();
+    renderToday();
+    toast('Coach reminder: today is still open.');
+    if ('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+      try{
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification('Coach: secure today', {
+          body,
+          tag:'coach-daily-' + todayISO(),
+          renotify:true,
+          icon:'/assets/icon-192.png',
+          badge:'/assets/icon-192.png',
+          actions:[
+            {action:'workout-now', title:'Workout Now'},
+            {action:'quick-start', title:'Quick Start'},
+            {action:'played-sport', title:'Played Sport'}
+          ],
+          data:{url:'/coach.html'}
+        });
+      }catch(e){}
+    }
+  }
+  function scheduleDailyReminder(){
+    clearTimeout(reminderTimer);
     try{
-      const enabled = localStorage.getItem('hwc_reminder_enabled');
-      if (enabled === 'false') return;
+      if (state.settings.reminderEnabled === false) return;
       const now = new Date();
       const reminder = new Date(now);
-      reminder.setHours(19,30,0,0);
-      const doneToday = state.sessions.some(s => s.date === todayISO());
+      const parts = String(state.settings.reminderTimeLocal || '19:00').split(':');
+      reminder.setHours(Number(parts[0]) || 0, Number(parts[1]) || 0, 0, 0);
       const ms = reminder - now;
-      if (!doneToday){
-        if (ms > 0){ setTimeout(()=>{ if (!state.sessions.some(s=>s.date===todayISO())) toast('Reminder: Try to move at 7:30pm — bank your win!'); }, Math.max(2000, ms)); }
-        else { /* past 19:30 and not done */ toast('Evening reminder: there’s still time to do a short session.'); }
-      }
+      if (daySummary(todayISO()).isSecured) return;
+      reminderTimer = setTimeout(fireDailyReminder, ms > 0 ? ms : 800);
     }catch(e){}
-  })();
+  }
+  function handleLaunchAction(){
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    if (!action) return;
+    if (action === 'played-sport') logProvisionalSport();
+    if (action === 'quick-start') momentumQuickStart();
+    if (action === 'workout-now') defaultWorkout();
+    params.delete('action');
+    const query = params.toString();
+    history.replaceState({}, '', window.location.pathname + (query ? '?' + query : '') + window.location.hash);
+  }
+  let renderedLocalDate = todayISO();
+  function refreshForLocalDayChange(){
+    if (todayISO() === renderedLocalDate) return;
+    renderedLocalDate = todayISO();
+    renderToday(); renderStreak();
+    scheduleDailyReminder();
+  }
+  window.setInterval(refreshForLocalDayChange, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshForLocalDayChange(); });
   // Day label help toggle (AM / PM / Full explanation)
   (function(){
     const dl = $('dayLabel');
@@ -1263,7 +1777,9 @@
   })();
   checkVersion();
 
-  renderToday(); renderPlan(); renderLibrary(); renderStreak(); show('today');
+  renderToday(); renderPlan(); renderLibrary(); renderStreak(); renderProfile(); show('today');
+  handleLaunchAction();
+  scheduleDailyReminder();
   })();
   </script>
 </body>

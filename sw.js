@@ -1,4 +1,4 @@
-const CACHE_NAME = 'coach-cache-20260719T005013Z';
+const CACHE_NAME = 'coach-cache-20260719T060619Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -27,6 +27,23 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const actions = {
+    'workout-now': '/coach.html?action=workout-now',
+    'quick-start': '/coach.html?action=quick-start',
+    'played-sport': '/coach.html?action=played-sport'
+  };
+  const target = new URL(actions[event.action] || '/coach.html', self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({type:'window', includeUncontrolled:true}).then(windows => {
+      const existing = windows.find(client => new URL(client.url).origin === self.location.origin);
+      if (existing) return existing.navigate(target).then(client => client.focus());
+      return self.clients.openWindow(target);
+    })
+  );
 });
 
 self.addEventListener('fetch', event => {

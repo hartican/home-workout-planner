@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#f7f6f2",
   "theme_color": "#01696f",
-  "description": "Coach: efficient home strength sessions, streaks, and an 8-week progression.",
+  "description": "Coach: daily movement, sport logging, streaks, and an 8-week strength progression.",
   "icons": [
     {
       "src": "./assets/icon-192.png",
