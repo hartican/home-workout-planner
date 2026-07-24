@@ -6,6 +6,9 @@ Jack's low-admin movement PWA. Keep it simple: plain `coach.html`, static assets
 ## Project Shape
 
 - Main app: `coach.html`.
+- State/profile migration seam: `coach-state-core.js`.
+- Exercise prescription/logging seam: `coach-prescription-core.js`.
+- Regression tests: `tests/*.test.js` using Node's built-in test runner.
 - Canonical spec: `Planning/coach-app-spec.md`.
 - Do Less marketing copy SSOT: `context/marketing-site-hero-copy.md`.
 - PWA files: `manifest.json`, `sw.js`, `version.json`, `assets/icon-180.png`.
@@ -23,6 +26,10 @@ Jack's low-admin movement PWA. Keep it simple: plain `coach.html`, static assets
   unless explicitly requested.
 - Keep app data local to the browser. Backup/restore should use JSON export and
   import from Settings.
+- Keep generated prescription values as hard minimums. User-entered rep, time,
+  and load adjustments may only increase them, and completed logs must retain
+  both generated and completed values.
+- Run `node --test tests/*.test.js` after persistence or prescription changes.
 - Verify mobile layout around 390px width for user-facing changes.
 - Verify service-worker precache paths exist before shipping.
 - Report outcomes in plain language.

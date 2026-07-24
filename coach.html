@@ -171,6 +171,16 @@
     .exercise-start{grid-column:1/-1;justify-self:start;margin-top:.45rem;border:0;border-radius:999px;background:var(--color-primary);color:var(--color-text-inverse);padding:.48rem .85rem;font-size:var(--text-sm);font-weight:800}
     .sessionovertime{font-variant-numeric:tabular-nums;font-size:var(--text-xs);font-weight:750;opacity:.9}
     .sessiontools{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-top:.8rem}
+    .prescriptionadjust{margin:.8rem 0 .15rem;padding:.75rem;border:1px solid var(--color-line);border-radius:.9rem;background:var(--color-surface-2)}
+    .prescriptionhead{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem}
+    .prescriptionhead span{font-size:var(--text-xs);font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-faint)}
+    .prescriptionhead strong{font-size:var(--text-sm);color:var(--color-primary);text-align:right}
+    .prescriptioncontrols{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem}
+    .prescriptioncontrol{display:grid;grid-template-columns:42px minmax(62px,auto) 42px;align-items:center;border:1px solid var(--color-line);border-radius:999px;overflow:hidden;background:var(--color-surface)}
+    .prescriptioncontrol button{width:42px;height:42px;border:0;background:transparent;color:var(--color-primary);font-size:1.25rem;font-weight:850}
+    .prescriptioncontrol button:disabled{color:var(--color-text-faint);opacity:.45}
+    .prescriptionvalue{text-align:center;font-size:var(--text-xs);font-weight:800;line-height:1.1}
+    .prescriptionvalue small{display:block;font-size:.62rem;color:var(--color-text-faint);font-weight:700}
     .difficulty{border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:999px;padding:.42rem .65rem;font-size:var(--text-xs);font-weight:750}
     .feedbackbtn{width:42px;height:42px;border:1px solid var(--color-line);border-radius:50%;background:var(--color-surface);color:var(--color-text);display:grid;place-items:center}
     .feedbackbtn[aria-pressed="true"]{background:var(--color-primary-soft);border-color:var(--color-primary);color:var(--color-primary)}
@@ -201,7 +211,7 @@
     .recaprow{padding:.7rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
     .recaprow strong{display:block}
     .recapmeta{color:var(--color-text-muted);font-size:var(--text-xs)}
-    .recapinputs{display:flex;gap:.5rem;margin-top:.5rem}
+    .recapinputs{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
     .recapinputs label{font-size:var(--text-xs);color:var(--color-text-muted)}
     .recapinputs input{display:block;width:6rem;margin-top:.2rem;padding:.45rem;border:1px solid var(--color-line);border-radius:.55rem;background:var(--color-surface-2);color:var(--color-text)}
 
@@ -491,6 +501,10 @@
         <span class="blocklabel" id="stepBlock">Warm-up</span>
         <h1 class="display" id="stepName">March + band pull-aparts</h1>
         <div class="target" id="stepTarget">60 seconds, easy pace</div>
+        <div class="prescriptionadjust" id="prescriptionAdjust" hidden>
+          <div class="prescriptionhead"><span>Current prescription</span><strong id="prescriptionCurrent"></strong></div>
+          <div class="prescriptioncontrols" id="prescriptionControls"></div>
+        </div>
         <div class="exerciseclock" id="exerciseClock">
           <span class="clocklabel">Exercise timer</span>
           <strong id="exerciseTimer">1:00</strong>
@@ -725,9 +739,13 @@
     <div class="toast" id="toast" role="status"></div>
   </div>
 
+  <script src="./coach-state-core.js"></script>
+  <script src="./coach-prescription-core.js"></script>
   <script>
   (function(){
   'use strict';
+  const StateCore = window.CoachStateCore;
+  const Prescription = window.CoachPrescriptionCore;
   const KEY = 'hwc_state_v1';
   const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
   const MOMENTUM_SYSTEM_VERSION = 1;
@@ -812,20 +830,23 @@
   }
   function defaultState(){
     return {
+      profileSchemaVersion:StateCore.PROFILE_SCHEMA_VERSION,
       startDate:todayISO(), progressionWeek:1, goal:'abs', sessions:[],
       lifts:{push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}},
       lastHashes:[], exercisePreferences:{}, familyPreferences:{}, setPreferences:{}, exercisePB:{},
       streakFreezeCount:2, signupFreezeGranted:true, streakFreezeUses:[], bonusWorkoutCounter:0, dayRewardLedger:{}, freezeEarnedByDate:{},
       lastDayEvaluatedLocal:todayISO(), momentumSystemVersion:MOMENTUM_SYSTEM_VERSION, settings:defaultSettings(), maxStreak:0,
-      profile:{name:'', username:'', avatar:'preset:ocean', height:null, age:null, sex:'', weight:null, fitnessLevel:''}
+      profile:StateCore.defaultProfile()
     };
   }
+  let profileRewriteNeeded = false;
   function load(){
     try{
       const raw = localStorage.getItem(KEY);
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
-      const merged = Object.assign(defaultState(), parsed);
+      profileRewriteNeeded = StateCore.profileNeedsRewrite(parsed);
+      const merged = StateCore.mergeSnapshot(defaultState(), parsed);
       if (!Object.prototype.hasOwnProperty.call(parsed, 'momentumSystemVersion')) merged.momentumSystemVersion = 0;
       if (!Object.prototype.hasOwnProperty.call(parsed, 'progressionWeek')){
         const start = new Date(String(merged.startDate || todayISO()) + 'T00:00:00');
@@ -834,12 +855,30 @@
       return merged;
     }catch(e){ return defaultState(); }
   }
-  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  function save(){
+    try{
+      state.profile = StateCore.normaliseProfile(state.profile);
+      state.profileSchemaVersion = StateCore.PROFILE_SCHEMA_VERSION;
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }catch(e){}
+  }
   let state = load();
   function normaliseSport(sport, index){
     const safe = {id:String(sport && sport.id || 'sport-' + index), name:String(sport && sport.name || 'Sport ' + (index + 1))};
     SPORT_SCORE_FIELDS.forEach(([key]) => { safe[key] = clampInputScore(sport && sport[key]); });
     return safe;
+  }
+  function normaliseLoggedExercise(exercise){
+    const prescription = Prescription.normaliseLog(exercise);
+    const currentTarget = Prescription.summary(prescription) || String(exercise && exercise.target || '');
+    return Object.assign({}, exercise, {
+      generatedTarget:prescription.generatedTarget,
+      target:currentTarget,
+      prescription,
+      reps:prescription.completedReps,
+      kg:prescription.completedLoadKg,
+      loggedSeconds:prescription.completedSeconds
+    });
   }
   function normaliseSession(entry, index){
     const source = entry && entry.sourceType || (entry && entry.mode === 'fallback' ? 'fallback' : entry && entry.mode === 'travel' ? 'travel' : 'guided');
@@ -849,7 +888,9 @@
       sourceType:source,
       isProvisional:source === 'sport_provisional' ? true : !!(entry && entry.isProvisional),
       sessionScore:clampSessionScore(entry && entry.sessionScore),
-      exercises:Array.isArray(entry && entry.exercises) ? entry.exercises.filter(exercise => exercise && exercise.exId && exercise.completed !== false) : [],
+      exercises:Array.isArray(entry && entry.exercises)
+        ? entry.exercises.filter(exercise => exercise && exercise.exId && exercise.completed !== false).map(normaliseLoggedExercise)
+        : [],
       completedAtLocal:String(entry && entry.completedAtLocal || String(entry && entry.date || todayISO()) + 'T12:00:00')
     });
   }
@@ -860,11 +901,8 @@
     state.settings = Object.assign(defaults, state.settings || {});
     state.settings.sports = Array.isArray(state.settings.sports) ? state.settings.sports.map(normaliseSport) : defaults.sports;
     state.settings.lastEnvironment = ['indoor','outdoor','both'].includes(state.settings.lastEnvironment) ? state.settings.lastEnvironment : 'indoor';
-    state.profile = Object.assign(defaultState().profile, state.profile || {});
-    delete state.profile.timezone;
-    delete state.profile.longitude;
-    state.profile.username = String(state.profile.username || '');
-    state.profile.avatar = String(state.profile.avatar || 'preset:ocean');
+    state.profile = StateCore.normaliseProfile(state.profile);
+    state.profileSchemaVersion = StateCore.PROFILE_SCHEMA_VERSION;
     state.progressionWeek = Math.max(1, Math.min(8, Math.floor(Number(state.progressionWeek) || weekFromStartDate())));
     state.exercisePreferences = state.exercisePreferences && typeof state.exercisePreferences === 'object' ? state.exercisePreferences : {};
     state.familyPreferences = state.familyPreferences && typeof state.familyPreferences === 'object' ? state.familyPreferences : {};
@@ -894,7 +932,10 @@
     if (bonusTotal >= 3){ state.streakFreezeCount += Math.floor(bonusTotal / 3); }
     state.bonusWorkoutCounter = bonusTotal % 3;
     state.lastDayEvaluatedLocal = parseISODate(state.lastDayEvaluatedLocal) ? state.lastDayEvaluatedLocal : todayISO();
-    if (JSON.stringify(state) !== before) save();
+    if (JSON.stringify(state) !== before || profileRewriteNeeded){
+      profileRewriteNeeded = false;
+      save();
+    }
   }
   ensureMomentumState();
 
@@ -1134,17 +1175,20 @@
     const multiplier = step.difficulty === 'easy' ? .8 : step.difficulty === 'hard' ? 1.2 : 1;
     step.target = difficultyTarget(step.baseTarget, step.difficulty);
     step.prescribedSec = Math.max(10, Math.round(step.basePrescribedSec * multiplier));
+    step.prescription = Prescription.create(step.target, step.prescribedSec);
   }
   function makeStep(exercise, target, restSec, block){
     const exId = exerciseId(exercise);
     const basePrescribedSec = estimateTargetSeconds(target);
-    return {
+    const step = {
       stepId:newId('step'), exId, block:block || exercise.cat, name:exercise.name,
       baseTarget:target, target, cue:exercise.cue, demo:exercise.demo || null, how:exercise.how || '',
       rest:restSec || 0, environment:exerciseEnvironment(exId), family:EX_FAMILY[exId] || 'other',
       difficulty:'medium', basePrescribedSec, prescribedSec:basePrescribedSec,
       elapsedSec:0, status:'idle', setNumber:1, liked:false, disliked:false
     };
+    step.prescription = Prescription.create(step.target, step.prescribedSec);
+    return step;
   }
   function goalFit(exId, focus){
     const family = EX_FAMILY[exId] || 'other';
@@ -1691,20 +1735,33 @@
       <label>${label}<input data-lift-field="${id}" type="number" min="0" step="${step}" value="${value}"></label>
       <span class="keysuggestion">${suggested > value ? `Suggested from recent logs: ${suggested}` : 'Keep building this baseline.'}</span>`).join('');
   }
-  function loggedKeyCount(key){
-    return state.sessions.slice(-8).reduce((count, entry) => count + (entry.exercises || []).filter(exercise => exercise.key === key).length, 0);
+  function loggedKeyValues(key, field){
+    const values = [];
+    state.sessions.slice(-8).forEach(entry => {
+      (entry.exercises || []).forEach(exercise => {
+        if (exercise.key !== key) return;
+        const value = Number(Prescription.normaliseLog(exercise)[field]);
+        if (Number.isFinite(value) && value > 0) values.push(value);
+      });
+    });
+    return values;
+  }
+  function suggestedLiftValue(key, field, current, threshold, increment){
+    const values = loggedKeyValues(key, field);
+    if (!values.length) return current;
+    const bestCompleted = Math.max(...values);
+    return Math.max(current, bestCompleted + (values.length >= threshold ? increment : 0));
   }
   function keyLiftSuggestions(){
     const L = state.lifts;
-    const pushCount = loggedKeyCount('push'), squatCount = loggedKeyCount('squat'), lungeCount = loggedKeyCount('lunge'), plankCount = loggedKeyCount('plank'), bridgeCount = loggedKeyCount('bridge');
     return {
-      pushReps:L.push.reps + (pushCount >= 2 ? 1 : 0),
-      squatReps:L.squat.reps + (squatCount >= 2 ? 1 : 0),
-      squatKg:L.squat.kg + (squatCount >= 3 ? 2.5 : 0),
-      lungeReps:L.lunge.reps + (lungeCount >= 2 ? 1 : 0),
-      lungeKg:L.lunge.kg + (lungeCount >= 3 ? 2.5 : 0),
-      plankSec:L.plank.sec + (plankCount >= 2 ? 5 : 0),
-      bridgeReps:L.bridge.reps + (bridgeCount >= 2 ? 1 : 0)
+      pushReps:suggestedLiftValue('push', 'completedReps', L.push.reps, 2, 1),
+      squatReps:suggestedLiftValue('squat', 'completedReps', L.squat.reps, 2, 1),
+      squatKg:suggestedLiftValue('squat', 'completedLoadKg', L.squat.kg, 3, 2.5),
+      lungeReps:suggestedLiftValue('lunge', 'completedReps', L.lunge.reps, 2, 1),
+      lungeKg:suggestedLiftValue('lunge', 'completedLoadKg', L.lunge.kg, 3, 2.5),
+      plankSec:suggestedLiftValue('plank', 'completedSeconds', L.plank.sec, 2, 5),
+      bridgeReps:suggestedLiftValue('bridge', 'completedReps', L.bridge.reps, 2, 1)
     };
   }
   function writeLiftValues(values){
@@ -1721,7 +1778,11 @@
     const logs = state.sessions.filter(entry => Array.isArray(entry.exercises) && entry.exercises.length).slice(-5).reverse();
     $('sessionHistory').innerHTML = logs.length ? logs.map(entry => `
       <div class="historyitem"><strong>${escapeHTML(entry.date)} · ${fmt(Number(entry.seconds) || 0)}</strong>
-        <span>${entry.exercises.map(exercise => escapeHTML(exercise.variantName || exercise.name)).join(' · ')}</span>
+        <span>${entry.exercises.map(exercise => {
+          const prescription = Prescription.normaliseLog(exercise);
+          const detail = Prescription.summary(prescription);
+          return escapeHTML((exercise.variantName || exercise.name) + (detail ? ' — ' + detail : ''));
+        }).join(' · ')}</span>
       </div>`).join('') : '<p class="say">Completed exercises will appear here after your first session.</p>';
   }
   function renderSettings(){
@@ -1854,19 +1915,15 @@
       p.sex = $('profileSex').value || '';
       p.weight = $('profileWeight').value || null;
       p.fitnessLevel = $('profileLevel').value || '';
-      delete p.timezone;
-      delete p.longitude;
-      state.profile = p;
+      state.profile = StateCore.normaliseProfile(p);
       save(); renderSettings(); toast('Profile saved');
     }
     if (e.target && e.target.id === 'exportData'){ exportCoachData(); }
     if (e.target && e.target.id === 'resetData'){ resetCoachData(); }
   });
 
-  function validImportState(value){
-    return value && typeof value === 'object' && Array.isArray(value.sessions) && value.lifts && typeof value.lifts === 'object';
-  }
   function exportCoachData(){
+    state = StateCore.mergeSnapshot(defaultState(), state);
     const payload = {app:'Do Less', exportedAt:new Date().toISOString(), version:localStorage.getItem('hwc_deployed_version') || null, state};
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
@@ -1886,8 +1943,7 @@
       try{
         const parsed = JSON.parse(String(reader.result || '{}'));
         const imported = parsed.state || parsed;
-        if (!validImportState(imported)) throw new Error('Invalid Do Less backup');
-        state = Object.assign(defaultState(), imported);
+        state = StateCore.importSnapshot(defaultState(), parsed);
         if (!Object.prototype.hasOwnProperty.call(imported, 'momentumSystemVersion')) state.momentumSystemVersion = 0;
         ensureMomentumState();
         save();
@@ -1906,7 +1962,7 @@
     localStorage.removeItem('hwc_theme_pref');
     localStorage.removeItem('hwc_reminder_enabled');
     localStorage.removeItem('hwc_deployed_version');
-    state = defaultState();
+    state = StateCore.resetSnapshot(defaultState());
     save();
     window.location.reload();
   }
@@ -2016,6 +2072,36 @@
   let pendingCompletedSessionId = null;
 
   function fmt(s){ const safe = Math.max(0, Math.floor(Number(s) || 0)); return Math.floor(safe/60) + ':' + String(safe%60).padStart(2,'0'); }
+  function renderPrescriptionAdjuster(step){
+    if (!step.prescription) step.prescription = Prescription.create(step.target, step.prescribedSec);
+    const value = step.prescription;
+    const fields = [];
+    if (value.baseReps != null) fields.push({field:'reps', label:value.perSide ? 'reps / side' : 'reps', value:value.reps, base:value.baseReps});
+    if (value.baseSeconds != null) fields.push({field:'seconds', label:value.perSide ? 'sec / side' : 'seconds', value:value.seconds, base:value.baseSeconds});
+    if (value.baseLoadKg != null) fields.push({field:'load', label:'load kg', value:value.loadKg, base:value.baseLoadKg});
+    $('prescriptionAdjust').hidden = fields.length === 0;
+    if (!fields.length) return;
+    $('prescriptionCurrent').textContent = Prescription.summary(value);
+    $('prescriptionControls').innerHTML = fields.map(item => `
+      <span class="prescriptioncontrol">
+        <button type="button" data-prescription-field="${item.field}" data-prescription-direction="-1" aria-label="Reduce ${item.label} to generated minimum" ${Number(item.value) <= Number(item.base) ? 'disabled' : ''}>−</button>
+        <span class="prescriptionvalue">${escapeHTML(item.value)}<small>${escapeHTML(item.label)}</small></span>
+        <button type="button" data-prescription-field="${item.field}" data-prescription-direction="1" aria-label="Increase ${item.label}">+</button>
+      </span>`).join('');
+  }
+  function adjustActivePrescription(field, direction){
+    const step = session && session.steps[stepIdx];
+    if (!step || !step.prescription) return;
+    step.prescription = Prescription.adjust(step.prescription, field, direction);
+    const value = step.prescription;
+    step.prescribedSec = value.seconds != null
+      ? value.seconds
+      : Math.max(10, value.generatedPrescribedSec + Math.round((Number(value.repIncrease) || 0) * 4));
+    renderPrescriptionAdjuster(step);
+    renderExerciseTimer();
+    const atGenerated = !value.repIncrease && !value.secondsIncrease && !value.loadIncreaseKg;
+    toast(atGenerated ? 'Back at the generated minimum.' : 'Prescription raised to ' + Prescription.summary(value) + '.');
+  }
   function sessionOvertimeSeconds(built){
     return (built && built.steps || []).reduce((total, step) => total + Math.max(0, (Number(step.elapsedSec) || 0) - (Number(step.prescribedSec) || 0)), 0);
   }
@@ -2046,6 +2132,7 @@
       step.elapsedSec = Number(step.elapsedSec) || 0;
       step.status = step.status === 'completed' ? 'completed' : 'idle';
       step.liked = false; step.disliked = false;
+      if (!step.prescription) step.prescription = Prescription.create(step.target, step.prescribedSec);
     });
     document.body.classList.add('in-session');
     $('phaseTxt').textContent = MODE_LABEL[session.mode];
@@ -2085,6 +2172,7 @@
     $('stepBlock').textContent = st.block + ' · step ' + (stepIdx+1) + ' of ' + session.steps.length;
     $('stepName').textContent = st.name;
     $('stepTarget').textContent = st.target;
+    renderPrescriptionAdjuster(st);
     $('stepCue').textContent = st.cue || '';
     if (st.exId){ $('stepDemo').href = yt(st.name + ' ' + st.difficulty + ' technique'); $('stepDemo').hidden = false; } else $('stepDemo').hidden = true;
     $('stepSwap').hidden = !replacementForStep(session, stepIdx);
@@ -2103,6 +2191,7 @@
     $('stepCard').classList.add('resting');
     $('exerciseClock').hidden = true;
     $('sessionTools').hidden = true;
+    $('prescriptionAdjust').hidden = true;
     $('stepPBNote').hidden = true;
     $('restTimer').textContent = fmt(restLeft);
     $('stepName').textContent = 'Rest';
@@ -2192,6 +2281,11 @@
     renderStep();
     toast('Difficulty set to ' + step.difficulty);
   });
+  $('prescriptionControls').addEventListener('click', event => {
+    const button = event.target.closest('[data-prescription-field]');
+    if (!button || button.disabled) return;
+    adjustActivePrescription(button.dataset.prescriptionField, Number(button.dataset.prescriptionDirection));
+  });
   $('stepLike').addEventListener('click', () => {
     const step = session && session.steps[stepIdx];
     if (!step) return;
@@ -2229,13 +2323,18 @@
       return;
     }
     const overtimeSeconds = sessionOvertimeSeconds(session);
-    const exercises = completed.map(step => ({
-      stepId:step.stepId, exId:step.exId, key:EX[step.exId] && EX[step.exId].key || null,
-      name:step.name, variantName:step.name + ' · ' + step.difficulty, difficulty:step.difficulty,
-      target:step.target, elapsedSec:step.elapsedSec, prescribedSec:step.prescribedSec,
-      overtimeSec:Math.max(0, step.elapsedSec - step.prescribedSec), setNumber:step.setNumber,
-      completed:true, pbUpdated:!!step.pbUpdated
-    }));
+    const exercises = completed.map(step => {
+      const prescription = Prescription.toLog(step.prescription || Prescription.create(step.target, step.prescribedSec));
+      return {
+        stepId:step.stepId, exId:step.exId, key:EX[step.exId] && EX[step.exId].key || null,
+        name:step.name, variantName:step.name + ' · ' + step.difficulty, difficulty:step.difficulty,
+        generatedTarget:prescription.generatedTarget, target:Prescription.summary(prescription), prescription,
+        reps:prescription.completedReps, kg:prescription.completedLoadKg, loggedSeconds:prescription.completedSeconds,
+        elapsedSec:step.elapsedSec, prescribedSec:step.prescribedSec,
+        overtimeSec:Math.max(0, step.elapsedSec - step.prescribedSec), setNumber:step.setNumber,
+        completed:true, pbUpdated:!!step.pbUpdated
+      };
+    });
     const rec = {
       sessionId:newId('session'), date:todayISO(), mode:session.mode,
       sourceType:session.sourceType || (session.mode === 'fallback' ? 'fallback' : session.mode === 'travel' ? 'travel' : 'guided'),
@@ -2259,14 +2358,19 @@
     const pbCount = rec.exercises.filter(exercise => exercise.pbUpdated).length;
     $('finishTiming').textContent = 'Overtime ' + fmt(rec.overtimeSeconds) + ' · ' + rec.exercises.length + ' completed exercise' + (rec.exercises.length === 1 ? '' : 's') + (pbCount ? ' · ' + pbCount + ' new PB' + (pbCount === 1 ? '' : 's') : '');
     $('sessionRecap').innerHTML = rec.exercises.map((exercise, index) => {
-      const keyInputs = exercise.key ? `<div class="recapinputs">
-        ${exercise.key === 'plank'
-          ? `<label>Actual seconds<input data-log-seconds="${index}" type="number" min="0" inputmode="numeric" placeholder="Optional"></label>`
-          : `<label>Actual reps<input data-log-reps="${index}" type="number" min="0" inputmode="numeric" placeholder="Optional"></label>`}
-        ${['squat','lunge'].includes(exercise.key) ? `<label>Load (kg)<input data-log-kg="${index}" type="number" min="0" step="2.5" inputmode="decimal" placeholder="Optional"></label>` : ''}
-      </div>` : '';
+      const prescription = Prescription.normaliseLog(exercise);
+      exercise.prescription = prescription;
+      const controls = [];
+      if (prescription.completedReps != null) controls.push(`<label>Completed reps<input data-log-reps="${index}" type="number" min="${prescription.completedReps}" step="1" inputmode="numeric" value="${prescription.completedReps}"></label>`);
+      if (prescription.completedSeconds != null) controls.push(`<label>Completed seconds<input data-log-seconds="${index}" type="number" min="${prescription.completedSeconds}" step="1" inputmode="numeric" value="${prescription.completedSeconds}"></label>`);
+      if (prescription.completedLoadKg != null) controls.push(`<label>Completed load (kg)<input data-log-kg="${index}" type="number" min="${prescription.completedLoadKg}" step="2.5" inputmode="decimal" value="${prescription.completedLoadKg}"></label>`);
+      const keyInputs = controls.length ? `<div class="recapinputs">${controls.join('')}</div>` : '';
+      const adjusted = prescription.repIncrease || prescription.secondsIncrease || prescription.loadIncreaseKg;
+      const prescriptionMeta = Prescription.summary(prescription)
+        ? ` · ${adjusted ? 'raised from ' + prescription.generatedTarget + ' to ' : 'completed at '}${Prescription.summary(prescription)}`
+        : '';
       return `<div class="recaprow"><strong>${escapeHTML(exercise.variantName)}${exercise.setNumber > 1 ? ` · set ${exercise.setNumber}` : ''}</strong>
-        <span class="recapmeta">${fmt(exercise.elapsedSec)} work · ${exercise.overtimeSec ? '+' + fmt(exercise.overtimeSec) + ' overtime' : 'within target'}${exercise.pbUpdated ? ' · new duration PB' : ''}</span>
+        <span class="recapmeta">${fmt(exercise.elapsedSec)} work · ${exercise.overtimeSec ? '+' + fmt(exercise.overtimeSec) + ' overtime' : 'within target'}${prescriptionMeta ? escapeHTML(prescriptionMeta) : ''}${exercise.pbUpdated ? ' · new duration PB' : ''}</span>
         ${keyInputs}</div>`;
     }).join('');
   }
@@ -2277,7 +2381,12 @@
       $('sessionRecap').querySelectorAll('[data-log-reps]').forEach(input => {
         const exercise = rec.exercises[Number(input.dataset.logReps)];
         if (!exercise || input.value === '') return;
-        exercise.reps = Math.max(0, Number(input.value) || 0);
+        const prescription = Prescription.normaliseLog(exercise);
+        exercise.reps = Math.max(Number(prescription.completedReps) || 0, Number(input.value) || 0);
+        prescription.completedReps = exercise.reps;
+        prescription.repIncrease = prescription.prescribedReps == null ? 0 : Math.max(0, exercise.reps - prescription.prescribedReps);
+        exercise.prescription = prescription;
+        exercise.target = Prescription.summary(prescription);
         const pbKey = exercise.exId + ':' + exercise.difficulty;
         const pb = state.exercisePB[pbKey] || {};
         if (exercise.reps > (Number(pb.reps) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {reps:exercise.reps, updatedAt:todayISO()});
@@ -2285,7 +2394,12 @@
       $('sessionRecap').querySelectorAll('[data-log-kg]').forEach(input => {
         const exercise = rec.exercises[Number(input.dataset.logKg)];
         if (!exercise || input.value === '') return;
-        exercise.kg = Math.max(0, Number(input.value) || 0);
+        const prescription = Prescription.normaliseLog(exercise);
+        exercise.kg = Math.max(Number(prescription.completedLoadKg) || 0, Number(input.value) || 0);
+        prescription.completedLoadKg = exercise.kg;
+        prescription.loadIncreaseKg = prescription.prescribedLoadKg == null ? 0 : Math.max(0, exercise.kg - prescription.prescribedLoadKg);
+        exercise.prescription = prescription;
+        exercise.target = Prescription.summary(prescription);
         const pbKey = exercise.exId + ':' + exercise.difficulty;
         const pb = state.exercisePB[pbKey] || {};
         if (exercise.kg > (Number(pb.kg) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {kg:exercise.kg, updatedAt:todayISO()});
@@ -2293,7 +2407,12 @@
       $('sessionRecap').querySelectorAll('[data-log-seconds]').forEach(input => {
         const exercise = rec.exercises[Number(input.dataset.logSeconds)];
         if (!exercise || input.value === '') return;
-        exercise.loggedSeconds = Math.max(0, Number(input.value) || 0);
+        const prescription = Prescription.normaliseLog(exercise);
+        exercise.loggedSeconds = Math.max(Number(prescription.completedSeconds) || 0, Number(input.value) || 0);
+        prescription.completedSeconds = exercise.loggedSeconds;
+        prescription.secondsIncrease = prescription.prescribedSeconds == null ? 0 : Math.max(0, exercise.loggedSeconds - prescription.prescribedSeconds);
+        exercise.prescription = prescription;
+        exercise.target = Prescription.summary(prescription);
         const pbKey = exercise.exId + ':' + exercise.difficulty;
         const pb = state.exercisePB[pbKey] || {};
         if (exercise.loggedSeconds > (Number(pb.durationSec) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {durationSec:exercise.loggedSeconds, updatedAt:todayISO()});

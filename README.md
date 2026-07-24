@@ -7,6 +7,9 @@ no backend, and local browser persistence only.
 ## Files
 
 - `coach.html` - the Do Less app, served at the site root.
+- `coach-state-core.js` - versioned local-state and profile migration rules.
+- `coach-prescription-core.js` - upwards-only prescription and completed-load rules.
+- `tests/` - dependency-free Node regression tests for persistence and prescriptions.
 - `Planning/coach-app-spec.md` - canonical product spec.
 - `context/marketing-site-hero-copy.md` - single source of truth for all Do Less marketing copy.
 - `assets/` - strong-arm app icons for the browser manifest and iOS home screen.
@@ -19,10 +22,11 @@ no backend, and local browser persistence only.
 - 4-question check-in that chooses session mode, time budget, focus, and indoor/outdoor context.
 - Quick start with reshuffle.
 - Per-exercise countdowns, overtime and PB feedback, plus pause, back, skip, swap, difficulty, and like/dislike controls.
+- Upwards-only in-session rep, hold-time, and load controls with the generated target enforced as the minimum.
 - Global goal, Profile, Key lifts, Appearance, sport configuration, and the Technique library under Settings.
 - Session generator with standard, momentum-reset, travel, and harder-day modes.
 - Duration-aware repeat sets, daily variation, environment-aware ordering, and an 8-week progression jump control.
-- Completed-only session logs with exact variants and specific technique-video searches.
+- Completed-only session logs with exact variants, generated and completed prescriptions, load history, and specific technique-video searches.
 - Daily streak tracking where any completed session counts, including fallback sessions, with three banked cheat-day freezes that refill one at a time every 30 days (maximum bank: three).
 - Evening beer-check prompt and time-of-day behavior.
 - Local export/import/reset controls under Settings.
@@ -35,6 +39,16 @@ a cloud database, no login is required, and data does not sync across devices.
 The app stores session history, key lifts, profile fields, theme preference,
 optional background signals, and deployed-version state. Browser storage can be
 cleared by the user, browser privacy settings, or device cleanup tools.
+
+Profile reload, import, and reset all use the same versioned migration path.
+Completed exercise logs store generated and completed reps, seconds, and load;
+Key-lift suggestions use those completed values.
+
+Run the local regression suite with:
+
+```sh
+node --test tests/*.test.js
+```
 
 Use Settings -> Export backup before clearing site data or moving devices. Use
 Settings -> Import backup to restore that JSON file in another browser. Use
